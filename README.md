@@ -2,7 +2,7 @@
 
 > 快速会打，体面上桌。不是教你赢老板，是教你成为大家愿意再约的搭档。
 
-[在线体验](https://guandan-bootcamp.miromind-0889.chatgpt.site) · [路线图](./ROADMAP.md) · [Launch Kit](./docs/LAUNCH_KIT.md) · [隐私说明](./PRIVACY.md) · [参与贡献](./CONTRIBUTING.md)
+[在线体验](https://guandan-bootcamp.miromind-0889.chatgpt.site) · [部署指南](./docs/DEPLOYMENT.md) · [路线图](./ROADMAP.md) · [Launch Kit](./docs/LAUNCH_KIT.md) · [隐私说明](./PRIVACY.md) · [参与贡献](./CONTRIBUTING.md)
 
 GuanDan Lab 是一个开源的零基础掼蛋训练器。它把确定性的竞技规则引擎、不会偷看牌的 AI 陪练、记牌训练和逐手复盘放在同一个 15 分钟学习路径里。默认场景是陪虚构角色“陈总”上桌：目标是节奏舒服、配合清楚、牌品可靠，而不是故意输牌或暗示牌情。
 
@@ -41,6 +41,8 @@ docker compose up --build
 ```
 
 默认 SQLite 数据位于 Docker 命名卷的 `/data/guandan.sqlite`。数据库启用 WAL、外键与 busy timeout，并保存游客资料、会话、完整牌局、逐手事件、分析和用量配额表。未配置 `SESSION_SECRET` 时会安全降级为纯本机存档，不会签发可伪造的生产会话。
+
+公网服务器、TLS 反向代理、备份、升级与 `guandan.mereith.com` DNS 步骤见 [部署指南](./docs/DEPLOYMENT.md)。
 
 自托管数据接口支持 `GET /api/progress?export=1` 导出当前游客的数据，及 `DELETE /api/progress` 删除资料。写入和删除要求同源请求与 HttpOnly 签名会话。
 
