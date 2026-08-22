@@ -4,6 +4,13 @@ All notable changes will be documented here.
 
 ## Unreleased
 
+## 0.3.0-beta.2 — 2026-08-22
+
+- Replaced the skippable crash course with 14 mastery-gated decisions covering card types, legal turns, table etiquette with 陈总 and event-based card counting.
+- Added versioned, fail-closed course progress persistence and protected AI/online play from untrained entry paths.
+- Improved mobile lesson navigation and safe-area spacing.
+- Added route-level ElevenLabs provider tests for opt-in, successful audio and browser fallback behavior.
+
 ## 0.3.0-beta.1 — 2026-08-22
 
 - Added signed, HttpOnly guest sessions and optional SQLite cloud progress for single-node self-hosting.
