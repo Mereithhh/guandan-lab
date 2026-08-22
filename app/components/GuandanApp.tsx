@@ -893,11 +893,7 @@ export default function GuandanApp({ supportUrl }: { supportUrl: string }) {
             toggleAgentMode={() => setAgentModeEnabled((value) => !value)}
           />
         )}{" "}
-        {view === "online" && (
-          <OnlineTable
-            enabled={account.onlineMatching && course.mastered.every(Boolean)}
-          />
-        )}{" "}
+        {view === "online" && <OnlineTable enabled={account.onlineMatching} />}{" "}
         {view === "memory" && <Memory locale={locale} />}{" "}
         {view === "replay" && <Replay history={history} />}
         <SiteFooter
@@ -1212,7 +1208,7 @@ function Home({
   locale: Locale;
   copy: OnboardingCopy;
 }) {
-  const continueRoom = onlineStatus.status === "matched" && trainingComplete,
+  const continueRoom = onlineStatus.status === "matched",
     h = copy.home;
   return (
     <>
@@ -1263,14 +1259,10 @@ function Home({
             {onlineAvailable && (
               <button
                 data-testid="online-match"
-                onClick={() => setView(trainingComplete ? "online" : "lesson")}
+                onClick={() => setView("online")}
                 className={`pixel-button ${continueRoom ? "primary" : "secondary"}`}
               >
-                {trainingComplete
-                  ? continueRoom
-                    ? h.onlineContinue
-                    : h.onlineBeta
-                  : h.onlineLocked}
+                {continueRoom ? h.onlineContinue : h.onlineBeta}
               </button>
             )}
             <ShareButton copy={copy} />
@@ -2378,7 +2370,7 @@ function OnlineTable({ enabled }: { enabled: boolean }) {
           <h1 className="text-3xl font-black">在线匹配尚未启用</h1>
           <p className="mt-4 text-slate-600">
             自托管配置 SQLite、签名会话并设置 ONLINE_MATCHING_ENABLED=1
-            后开放。公开 Demo 保持单机训练，避免伪装成在线服务。
+            后开放；未启用时仍可使用完整的本地 AI 对局。
           </p>
         </div>
       </section>
@@ -2543,7 +2535,7 @@ function OnlineTable({ enabled }: { enabled: boolean }) {
             </div>
           ))}
         </div>
-        <div className="mt-5 flex flex-wrap justify-center gap-3">
+        <div className="online-actions mt-5 flex flex-wrap justify-center gap-3">
           <button
             disabled={busy || !myTurn || !last}
             onClick={() => void act("pass")}

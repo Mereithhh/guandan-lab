@@ -7,17 +7,17 @@
 [![CI](https://github.com/Mereithhh/guandan-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/Mereithhh/guandan-lab/actions/workflows/ci.yml)
 [![Latest release](https://img.shields.io/github/v/release/Mereithhh/guandan-lab?include_prereleases)](https://github.com/Mereithhh/guandan-lab/releases)
 [![License](https://img.shields.io/github/license/Mereithhh/guandan-lab)](./LICENSE)
-[![Try the public demo](https://img.shields.io/badge/demo-play_now-57e3bd)](https://guandan-bootcamp.miromind-0889.chatgpt.site)
+[![Try the public demo](https://img.shields.io/badge/demo-play_now-57e3bd)](https://guandan.mereith.com)
 
-[▶ 在线体验](https://guandan-bootcamp.miromind-0889.chatgpt.site) · [☆ Star 项目](https://github.com/Mereithhh/guandan-lab) · [◇ 加入讨论](https://github.com/Mereithhh/guandan-lab/discussions/35) · [⌘ 本机运行](#快速启动)
+[▶ 在线体验](https://guandan.mereith.com) · [☆ Star 项目](https://github.com/Mereithhh/guandan-lab) · [◇ 加入讨论](https://github.com/Mereithhh/guandan-lab/discussions/35) · [⌘ 本机运行](#快速启动)
 
-[在线体验](https://guandan-bootcamp.miromind-0889.chatgpt.site) · [首发讨论](https://github.com/Mereithhh/guandan-lab/discussions/35) · [生产上线清单](https://github.com/Mereithhh/guandan-lab/issues/34) · [部署指南](./docs/DEPLOYMENT.md) · [路线图](./ROADMAP.md) · [Launch Kit](./docs/LAUNCH_KIT.md) · [素材授权](./docs/ASSETS.md) · [隐私说明](./PRIVACY.md) · [参与贡献](./CONTRIBUTING.md)
+[在线体验](https://guandan.mereith.com) · [首发讨论](https://github.com/Mereithhh/guandan-lab/discussions/35) · [生产上线清单](https://github.com/Mereithhh/guandan-lab/issues/34) · [部署指南](./docs/DEPLOYMENT.md) · [路线图](./ROADMAP.md) · [Launch Kit](./docs/LAUNCH_KIT.md) · [素材授权](./docs/ASSETS.md) · [隐私说明](./PRIVACY.md) · [参与贡献](./CONTRIBUTING.md)
 
 GuanDan Lab 是一个开源的零基础掼蛋训练器。它先用标称 15 分钟的 mastery 课程教授核心规则，再让用户进入不会偷看牌的 AI 整副陪练、记牌训练和逐手复盘。默认场景是陪“王总”上桌：目标是节奏舒服、配合清楚、牌品可靠，而不是故意输牌或暗示牌情。
 
 ![GuanDan Lab 真实产品演示：训练入口、课程、记牌与 AI 牌桌](./public/walkthrough.gif)
 
-[确定性核心与 32 项一致性检查](./tests/unit/conformance.test.ts) · [公平 AI 的可见信息边界](./docs/ARCHITECTURE.md) · 178 项单元/契约测试 · [beta.15 付费服务安全审查](./docs/SECURITY_REVIEW_BETA15.md)
+[确定性核心与 32 项一致性检查](./tests/unit/conformance.test.ts) · [公平 AI 的可见信息边界](./docs/ARCHITECTURE.md) · 176 项单元/契约测试 · [beta.15 付费服务安全审查](./docs/SECURITY_REVIEW_BETA15.md)
 
 ## 已经可以做什么
 
@@ -31,6 +31,7 @@ GuanDan Lab 是一个开源的零基础掼蛋训练器。它先用标称 15 分�
 - 可安装的 Web App、搜索引擎发现文件、真实能力结构化数据和不含追踪参数的系统分享入口。
 - 基于真实双副牌 ID 的已见牌减法、九宫关键牌余量盘、完整事件回放，以及牌技分与社交分分离的赛后建议。
 - 游客模式无需注册；浏览器支持且未清理 localStorage 时会保存训练记录，自托管配置 SQLite 后可跨设备合并课程、残局、两种记牌成绩、偏好、完整牌局事件与分析，旧设备不会把已获得进度锁回去。
+- 官方在线 Demo 由项目自己的 Docker 服务承载，匿名游客可直接进入四人真人大厅；本地 AI 完整对局仍始终可用。在线 Agent、赛后复盘与中文语音分别由兼容模型和 ElevenLabs 提供，并保留本地规则与设备语音兜底。
 
 <details>
 <summary>查看真实界面截图</summary>
@@ -125,9 +126,9 @@ npm run test:e2e
 
 ## 架构边界
 
-`lib/game` 是零 I/O 的确定性规则核心。公开 Demo 默认以单机训练为主；自托管设置 `ONLINE_MATCHING_ENABLED=1` 后可启用四人真人匹配 Beta。在线房间采用服务端权威状态、仅本人手牌的座位投影、版本化动作日志、刷新重连、两分钟无操作取消和主动退出；详见 [架构说明](./docs/ARCHITECTURE.md)。
+`lib/game` 是零 I/O 的确定性规则核心。官方 Demo 同时开放本地 AI 完整对局和四人真人匹配 Beta。在线房间采用服务端权威状态、仅本人手牌的座位投影、版本化动作日志、刷新重连、两分钟无操作取消和主动退出；详见 [架构说明](./docs/ARCHITECTURE.md)。
 
-自托管长期路线是 Node BFF + SQLite 单实例；Cloudflare Sites 路线使用 D1 + Durable Objects。两者共享规则核心和网络协议，不共享存储实现。
+公开部署采用 Node BFF + SQLite 单实例；未来多实例路线会引入共享协调层，但仍复用同一套规则核心和网络协议。
 
 ## 项目路线
 
