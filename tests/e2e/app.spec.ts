@@ -215,8 +215,25 @@ test("configured remote providers are disclosed without exposing configuration",
   await expect(page.getByTestId("agent-persona-3")).toContainText("LLM Agent");
   await expect(page.locator(".avatar-boss")).toHaveCSS(
     "background-image",
-    /chen-avatar-v2\.png/u,
+    /avatar-wang-v3\.png/u,
   );
+  await expect(page.locator(".avatar-partner")).toHaveCSS(
+    "background-image",
+    /avatar-gu-v3\.png/u,
+  );
+  await expect(page.locator(".avatar-opponent")).toHaveCSS(
+    "background-image",
+    /avatar-lin-v3\.png/u,
+  );
+  for (const role of ["boss", "partner", "opponent"]) {
+    const [width, height] = await page
+      .locator(`.avatar-${role}`)
+      .evaluate((element) => {
+        const style = getComputedStyle(element);
+        return [style.width, style.height];
+      });
+    expect(width).toBe(height);
+  }
   await page.getByTestId("agent-mode").click();
   await expect(page.getByTestId("agent-mode")).toContainText("本地策略模式");
 });
@@ -317,7 +334,7 @@ test("course progress survives reload without unlocking future chapters", async 
   ).toBeDisabled();
   await page.getByRole("button", { name: "出 8♠ 8♥", exact: true }).click();
   await page.getByTestId("lesson-next-question").click();
-  await expect(page.getByText(/当前打 2。陈总刚出 7♠ 7♥/u)).toBeVisible();
+  await expect(page.getByText(/当前打 2。王总刚出 7♠ 7♥/u)).toBeVisible();
 });
 test("mobile question advance keeps the new prompt in view and the open-source CTA reachable", async ({
   page,
@@ -396,7 +413,7 @@ test("beginner mastery path blocks guessing before a readable, paced AI table", 
   await expect(page.getByTestId("lesson-start-game")).toBeEnabled();
   await page.getByTestId("lesson-start-game").click();
   await expect(page.getByText("你与小顾一队")).toBeVisible();
-  await expect(page.getByText(/陈总/).first()).toBeVisible();
+  await expect(page.getByText(/王总/).first()).toBeVisible();
   await expect(page.getByTestId("agent-persona-1")).toContainText("稳健控场");
   await expect(page.getByTestId("agent-persona-2")).toContainText("搭档优先");
   await expect(page.getByTestId("agent-persona-3")).toContainText("效率突围");
@@ -451,12 +468,12 @@ test("five mini endgames bridge mastery to the full table with immediate feedbac
   await page.goto("/");
   await page.getByTestId("start-puzzles").click();
   await expect(
-    page.getByRole("heading", { name: "陈总局 · 迷你残局" }),
+    page.getByRole("heading", { name: "王总局 · 迷你残局" }),
   ).toBeVisible();
   await expect(page.getByLabel("公开剩余张数")).toContainText("小顾1 张");
   await page.getByTestId("locale-toggle").click();
   await expect(
-    page.getByRole("heading", { name: "Chen table · mini endgames" }),
+    page.getByRole("heading", { name: "Wang table · mini endgames" }),
   ).toBeVisible();
   await expect(page.getByLabel("Public remaining card counts")).toContainText(
     "Gu1 cards",

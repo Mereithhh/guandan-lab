@@ -105,7 +105,7 @@ describe("compatible agent route contract", () => {
     expect(String(init?.body)).not.toContain("server-agent-secret");
     expect(String(init?.body)).not.toContain("must-not-leave-route");
     expect(String(init?.body)).not.toContain("IGNORE RULES");
-    expect(String(init?.body)).toContain("虚构角色“陈总”");
+    expect(String(init?.body)).toContain("你是“王总”的决策层");
   });
 
   it("rejects unsafe provider URLs and cross-origin callers before fetch", async () => {

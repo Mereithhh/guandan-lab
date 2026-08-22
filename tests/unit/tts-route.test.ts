@@ -13,7 +13,7 @@ afterEach(()=>{vi.useRealTimers();vi.unstubAllGlobals();vi.unstubAllEnvs();reset
 describe('ElevenLabs TTS route',()=>{
   it('keeps paid speech opt-in and exposes a browser fallback',async()=>{
     vi.stubEnv('PAID_PROVIDERS_ENABLED','0');
-    const response=await POST(request('陈总，这手漂亮。'));
+    const response=await POST(request('王总，这手漂亮。'));
     expect(response.status).toBe(503);
     await expect(response.json()).resolves.toMatchObject({fallback:'browser'});
   });
@@ -21,13 +21,13 @@ describe('ElevenLabs TTS route',()=>{
   it('sends normalized Chinese coaching text to ElevenLabs without exposing its key',async()=>{
     vi.stubEnv('PAID_PROVIDERS_ENABLED','1');vi.stubEnv('ELEVENLABS_API_KEY','server-secret');vi.stubEnv('ELEVENLABS_VOICE_ID','voice/a');vi.stubEnv('ELEVENLABS_MODEL_ID','eleven_multilingual_v2');
     const provider=vi.fn<typeof fetch>(async()=>new Response(new Uint8Array([1,2,3]),{headers:{'content-type':'audio/mpeg'}}));vi.stubGlobal('fetch',provider);
-    const response=await POST(request('  陈总，  这手牌权送得很准。 '));
+    const response=await POST(request('  王总，  这手牌权送得很准。 '));
     expect(response.status).toBe(200);expect(response.headers.get('content-type')).toBe('audio/mpeg');
     expect(provider).toHaveBeenCalledOnce();const [url,init]=provider.mock.calls[0];
     expect(url).toBe('https://api.elevenlabs.io/v1/text-to-speech/voice%2Fa');
     expect(init!.redirect).toBe('error');
     expect((init!.headers as Record<string,string>)['xi-api-key']).toBe('server-secret');
-    expect(JSON.parse(String(init!.body))).toEqual({text:'陈总， 这手牌权送得很准。',model_id:'eleven_multilingual_v2',output_format:'mp3_44100_128'});
+    expect(JSON.parse(String(init!.body))).toEqual({text:'王总， 这手牌权送得很准。',model_id:'eleven_multilingual_v2',output_format:'mp3_44100_128'});
     expect(String(init!.body)).not.toContain('server-secret');expect([...response.headers.values()].join(' ')).not.toContain('server-secret');
   });
 

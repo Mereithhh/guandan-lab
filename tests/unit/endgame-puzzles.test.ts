@@ -6,7 +6,7 @@ import type { GameState,Seat } from '@/lib/game/types';
 
 function stateFor(puzzle:typeof ENDGAME_PUZZLES[number]):GameState{
   const used=new Set([...puzzle.learnerHand,...(puzzle.lastPlay?.cards??[])].map(card=>card.id)),available=createDeck().filter(card=>!used.has(card.id));let cursor=0;
-  const names=['你','陈总','小顾','林姐'],roles=['you','boss','partner','opponent'] as const;
+  const names=['你','王总','小顾','林姐'],roles=['you','boss','partner','opponent'] as const;
   const players=names.map((name,seat)=>({seat:seat as Seat,name,role:roles[seat],hand:seat===0?puzzle.learnerHand:available.slice(cursor,cursor+=puzzle.remaining[seat])}));
   return{schemaVersion:2,ruleVersion:'竞技掼蛋2022-教学版',seed:puzzle.seed,createdAt:0,level:puzzle.level,levelOwner:null,phase:'playing',players,turn:0,leader:puzzle.leader,lastPlay:puzzle.lastPlay?{seat:puzzle.lastPlay.seat,cardIds:puzzle.lastPlay.cards.map(card=>card.id),combo:puzzle.lastPlay.combo}:null,passes:puzzle.publicPasses,finishOrder:[],events:[],trickNo:1,roundNo:1,teamLevels:[puzzle.level,puzzle.level],matchWinner:null};
 }

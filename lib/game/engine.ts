@@ -6,7 +6,7 @@ const nextSeat=(state:GameState,from:Seat):Seat=>{for(let i=1;i<=4;i++){const s=
 const event=(state:GameState,type:GameEvent['type'],seat?:Seat,cardIds?:string[],note?:string):GameEvent=>({id:`e${state.events.length+1}`,type,seat,cardIds,at:state.events.length,note});
 
 export function newGame(seed=Date.now(),level:Rank=2):GameState{
-  const deck=shuffle(createDeck(),seed),names=['你','陈总','小顾','林姐'],roles=['you','boss','partner','opponent'] as const;
+  const deck=shuffle(createDeck(),seed),names=['你','王总','小顾','林姐'],roles=['you','boss','partner','opponent'] as const;
   const players=names.map((name,seat)=>({seat:seat as Seat,name,role:roles[seat],hand:sortCards(deck.slice(seat*27,seat*27+27),level)}));
   const first=(Math.abs(seed)%4) as Seat;
   return{schemaVersion:2,ruleVersion:'竞技掼蛋2022-教学版',seed,createdAt:Date.now(),level,levelOwner:null,phase:'playing',players,turn:first,leader:first,lastPlay:null,passes:0,finishOrder:[],events:[{id:'e1',type:'deal',at:0,note:`本副牌序已生成 · ${names[first]}首出`}],trickNo:1,roundNo:1,teamLevels:[level,level],matchWinner:null};
@@ -49,7 +49,7 @@ export function resultLabel(state:GameState){if(state.phase!=='finished')return'
 
 export function resultSummary(state:GameState){
   if(state.phase!=='finished'||state.finishOrder.length<4)return'';
-  const winnerTeam=(state.finishOrder[0]%2) as 0|1,team=winnerTeam===0?'你 / 小顾队':'陈总 / 林姐队';
+  const winnerTeam=(state.finishOrder[0]%2) as 0|1,team=winnerTeam===0?'你 / 小顾队':'王总 / 林姐队';
   if(state.matchWinner!==null)return`${team} · 过 A · ${winnerTeam===0?'你方赢得比赛':'你方本场告负'}`;
   const pattern=state.finishOrder[1]%2===winnerTeam?'双上':state.finishOrder[2]%2===winnerTeam?'头游三游':'头游末游',steps=upgradeSteps(state.finishOrder);
   return`${team} · ${pattern} · 升 ${steps} 级 · ${winnerTeam===0?'你方升级':'你方本副未升级'}`;
