@@ -4,6 +4,15 @@ All notable changes will be documented here.
 
 ## Unreleased
 
+## 0.3.0-beta.14 — 2026-08-22
+
+- Added versioned cross-device SQLite sync for course mastery, mini-endgames, both memory drills, language and AI pace, with monotonic merging that prevents stale-device rollback.
+- Merged guest training profiles transactionally during Google account claiming and included them in export/deletion flows.
+- Added stable memory-attempt IDs, explicit endgame reset epochs, multi-context browser coverage and server validation for bounded training snapshots.
+- Added automated WCAG A/AA scans for the home page, rulebook, course, memory lab and AI table; fixed three serious contrast failures uncovered by the new gate.
+- Added compare-and-swap conflict handling with local-delta replay, bounded rate-limit storage and transactional session revalidation so stale or in-flight writes cannot erase full memory history or revive a deleted/claimed guest.
+- Gated training interaction until cloud restoration completes, localized both memory drills in English, and trapped keyboard focus inside the rulebook dialog.
+
 ## 0.3.0-beta.13 — 2026-08-22
 
 - Added a bilingual system-share action with a clipboard fallback and no referral or tracking parameters.

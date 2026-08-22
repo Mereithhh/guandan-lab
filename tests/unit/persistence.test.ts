@@ -4,8 +4,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { newGame } from '../../lib/game/engine';
-import { claimGoogleAccount, deleteUserProgress, exportUserProgress, hasOnlinePresence, isSessionActive, listMatchSummaries, openProgressDatabase, resetProgressDatabaseForTests, revokeSession, saveCompletedMatch, upsertSession } from '../../lib/services/progress-store';
+import { claimGoogleAccount, deleteUserProgress, exportUserProgress, getTrainingProfile, hasOnlinePresence, isSessionActive, listMatchSummaries, openProgressDatabase, resetProgressDatabaseForTests, revokeSession, saveCompletedMatch, saveTrainingProfile, upsertSession } from '../../lib/services/progress-store';
 import { createGuestSession, expiredSessionCookie, readCookie, SESSION_COOKIE, sessionCookie, signSession, verifySession } from '../../lib/services/session';
+import { EMPTY_TRAINING_PROFILE } from '../../lib/services/training-profile';
 
 const secret = 'unit-test-session-secret-with-32-characters';
 
@@ -60,6 +61,35 @@ describe('SQLite progress store', () => {
     rmSync(directory, { recursive: true, force: true });
   });
 
+  it('migrates a v3 database to bounded training profiles', async () => {
+    const directory = mkdtempSync(join(tmpdir(), 'guandan-v3-'));
+    const path = join(directory, 'progress.sqlite'), previous = new DatabaseSync(path);
+    previous.exec(`
+      PRAGMA foreign_keys=ON;
+      CREATE TABLE users(id TEXT PRIMARY KEY,kind TEXT NOT NULL,display_name TEXT NOT NULL,created_at TEXT NOT NULL,updated_at TEXT NOT NULL);
+      CREATE TABLE sessions(id TEXT PRIMARY KEY,user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,expires_at TEXT NOT NULL,created_at TEXT NOT NULL);
+      CREATE TABLE google_accounts(provider_subject TEXT PRIMARY KEY,user_id TEXT NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,email TEXT NOT NULL,created_at TEXT NOT NULL,updated_at TEXT NOT NULL);
+      CREATE TABLE matches(id TEXT PRIMARY KEY,user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,seed INTEGER NOT NULL,level TEXT NOT NULL,round_no INTEGER NOT NULL,score INTEGER NOT NULL,social_score INTEGER NOT NULL,title TEXT NOT NULL,state_json TEXT NOT NULL,finished_at TEXT NOT NULL,UNIQUE(user_id,seed));
+      INSERT INTO users VALUES('v3-user','google','旧牌友','2026-01-01T00:00:00.000Z','2026-01-02T00:00:00.000Z');
+      INSERT INTO sessions VALUES('v3-session','v3-user','2099-01-01T00:00:00.000Z','2026-01-01T00:00:00.000Z');
+      INSERT INTO google_accounts VALUES('v3-google-subject','v3-user','v3@example.com','2026-01-01T00:00:00.000Z','2026-01-02T00:00:00.000Z');
+      INSERT INTO matches VALUES('v3-match','v3-user',303,2,1,77,88,'旧局','{"schemaVersion":2,"players":[],"events":[]}','2026-01-03T00:00:00.000Z');
+      PRAGMA user_version=3;
+    `);
+    previous.close();
+    const database = await openProgressDatabase(path);
+    expect(database!.prepare('PRAGMA user_version').get()).toEqual({ user_version: 4 });
+    expect(database!.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='training_profiles'").get()).toEqual({ name: 'training_profiles' });
+    expect(exportUserProgress(database!, 'v3-user')).toMatchObject({
+      profile: { id: 'v3-user', kind: 'google', display_name: '旧牌友' },
+      googleAccount: { provider_subject: 'v3-google-subject', email: 'v3@example.com' },
+      training: { revision: 0, profile: EMPTY_TRAINING_PROFILE },
+      matches: [{ id: 'v3-match', seed: 303, score: 77, social_score: 88 }],
+    });
+    resetProgressDatabaseForTests();
+    rmSync(directory, { recursive: true, force: true });
+  });
+
   it('stores a completed game and its append-only evidence transactionally', async () => {
     const database = await openProgressDatabase(':memory:');
     expect(database).not.toBeNull();
@@ -74,8 +104,49 @@ describe('SQLite progress store', () => {
     expect(exported.matches).toHaveLength(1);
     expect(exported.events).toHaveLength(game.events.length);
     expect(exported.analyses).toHaveLength(1);
+    expect(exported.training).toMatchObject({ revision: 0, profile: EMPTY_TRAINING_PROFILE });
     deleteUserProgress(database!, claims.userId);
     expect(listMatchSummaries(database!, claims.userId)).toEqual([]);
+  });
+
+  it('monotonically merges bounded training snapshots and deletes them with the profile', async () => {
+    const database = await openProgressDatabase(':memory:'), { claims } = await createGuestSession(secret);
+    upsertSession(database!, claims);
+    const first = saveTrainingProfile(database!, claims, {
+      ...structuredClone(EMPTY_TRAINING_PROFILE),
+      course: { progress: [3, 1, 0, 0], mastered: [true, false, false, false], mistakes: [1, 0, 0, 0] },
+      countAttempts: [{ round: 1, kind: 'ace', seen: 2, remaining: 6, answer: 6, correct: true }],
+    });
+    expect(first.revision).toBe(1);
+    const stale = saveTrainingProfile(database!, claims, {
+      ...structuredClone(EMPTY_TRAINING_PROFILE),
+      course: { progress: [1, 0, 0, 0], mastered: [false, false, false, false], mistakes: [2, 0, 0, 0] },
+      gridAttempts: [{ round: 1, score: 2 }],
+      locale: 'en',
+    });
+    expect(stale).toMatchObject({ revision: 2, profile: { locale: 'en', course: { progress: first.profile.course.progress, mastered: first.profile.course.mastered, mistakes: [2, 0, 0, 0] } } });
+    expect(stale.profile.countAttempts).toHaveLength(1);
+    expect(stale.profile.gridAttempts).toHaveLength(1);
+    expect(exportUserProgress(database!, claims.userId).training.revision).toBe(2);
+    deleteUserProgress(database!, claims.userId);
+    expect(getTrainingProfile(database!, claims.userId).revision).toBe(0);
+  });
+
+  it('does not let an invalidated session recreate training after deletion or Google claim', async () => {
+    const database = await openProgressDatabase(':memory:');
+    const deleted = await createGuestSession(secret);
+    upsertSession(database!, deleted.claims);
+    deleteUserProgress(database!, deleted.claims.userId);
+    expect(() => saveTrainingProfile(database!, deleted.claims, { ...structuredClone(EMPTY_TRAINING_PROFILE), locale: 'en' })).toThrow(/no longer active/u);
+    expect(exportUserProgress(database!, deleted.claims.userId)).toMatchObject({ profile: null, googleAccount: null, training: { revision: 0 } });
+
+    const claimed = await createGuestSession(secret);
+    upsertSession(database!, claimed.claims);
+    const google = claimGoogleAccount(database!, claimed.claims.userId, { subject: 'google-race-subject', email: 'race@example.com', displayName: '竞态牌友' });
+    expect(() => saveTrainingProfile(database!, claimed.claims, { ...structuredClone(EMPTY_TRAINING_PROFILE), locale: 'en' })).toThrow(/no longer active/u);
+    expect(isSessionActive(database!, claimed.claims)).toBe(false);
+    expect(exportUserProgress(database!, claimed.claims.userId).profile).toBeNull();
+    expect(getTrainingProfile(database!, google.userId).revision).toBe(0);
   });
 
   it('upserts the same signed session without duplicate records', async () => {
@@ -93,10 +164,15 @@ describe('SQLite progress store', () => {
     const database = await openProgressDatabase(':memory:');
     const { claims } = await createGuestSession(secret);
     saveCompletedMatch(database!, claims, { ...newGame(77), phase: 'finished' }, { score: 80, socialScore: 90, title: '均衡协作型', advice: [], metrics: {} });
+    saveTrainingProfile(database!, claims, { ...structuredClone(EMPTY_TRAINING_PROFILE), course: { progress: [3, 0, 0, 0], mastered: [true, false, false, false], mistakes: [1, 0, 0, 0] } });
     const google = claimGoogleAccount(database!, claims.userId, { subject: 'google-subject-1', email: 'player@example.com', displayName: '牌友' });
     expect(listMatchSummaries(database!, google.userId)).toHaveLength(1);
+    expect(getTrainingProfile(database!, google.userId)).toMatchObject({ revision: 2, profile: { course: { mastered: [true, false, false, false] } } });
     expect(exportUserProgress(database!, claims.userId).profile).toBeNull();
+    expect(exportUserProgress(database!, claims.userId).googleAccount).toBeNull();
+    expect(exportUserProgress(database!, google.userId).googleAccount).toMatchObject({ provider_subject: 'google-subject-1', email: 'player@example.com' });
     expect(claimGoogleAccount(database!, null, { subject: 'google-subject-1', email: 'new@example.com', displayName: '新牌友' }).userId).toBe(google.userId);
+    expect(exportUserProgress(database!, google.userId).googleAccount).toMatchObject({ provider_subject: 'google-subject-1', email: 'new@example.com' });
   });
 
   it('refuses to cascade-delete an identity participating in matchmaking', async () => {

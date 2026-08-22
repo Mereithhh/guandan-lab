@@ -1,5 +1,6 @@
 interface WindowCounter { count: number; resetAt: number }
 const counters = new Map<string, WindowCounter>();
+const MAX_RATE_LIMIT_KEYS = 5_000;
 
 export function requestClientKey(request: Request, namespace: string, trustProxy = false): string {
   const forwarded = trustProxy ? request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() : null;
@@ -9,6 +10,10 @@ export function requestClientKey(request: Request, namespace: string, trustProxy
 export function consumeRateLimit(key: string, limit: number, windowMs: number, now = Date.now()): boolean {
   const current = counters.get(key);
   if (!current || current.resetAt <= now) {
+    if (counters.size >= MAX_RATE_LIMIT_KEYS) {
+      for (const [candidate, counter] of counters) if (counter.resetAt <= now) counters.delete(candidate);
+      while (counters.size >= MAX_RATE_LIMIT_KEYS) counters.delete(counters.keys().next().value as string);
+    }
     counters.set(key, { count: 1, resetAt: now + windowMs });
     return true;
   }
