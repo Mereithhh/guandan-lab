@@ -61,7 +61,7 @@ describe('SQLite progress store', () => {
     rmSync(directory, { recursive: true, force: true });
   });
 
-  it('migrates a v3 database to bounded training profiles', async () => {
+  it('migrates a v3 database to bounded training profiles and a durable global usage ledger', async () => {
     const directory = mkdtempSync(join(tmpdir(), 'guandan-v3-'));
     const path = join(directory, 'progress.sqlite'), previous = new DatabaseSync(path);
     previous.exec(`
@@ -78,8 +78,9 @@ describe('SQLite progress store', () => {
     `);
     previous.close();
     const database = await openProgressDatabase(path);
-    expect(database!.prepare('PRAGMA user_version').get()).toEqual({ user_version: 4 });
+    expect(database!.prepare('PRAGMA user_version').get()).toEqual({ user_version: 5 });
     expect(database!.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='training_profiles'").get()).toEqual({ name: 'training_profiles' });
+    expect(database!.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='global_usage_quotas'").get()).toEqual({ name: 'global_usage_quotas' });
     expect(exportUserProgress(database!, 'v3-user')).toMatchObject({
       profile: { id: 'v3-user', kind: 'google', display_name: '旧牌友' },
       googleAccount: { provider_subject: 'v3-google-subject', email: 'v3@example.com' },

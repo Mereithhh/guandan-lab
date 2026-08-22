@@ -82,7 +82,9 @@ Caddy obtains and renews certificates automatically. With Nginx, overwrite and f
 - ElevenLabs: `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`
 - Voluntary support QR: set `SUPPORT_URL` to a public sponsorship or payment page
 
-Keep production secrets only in the server's `.env.local`; never commit them. Before enabling paid providers for anonymous public traffic, add connection-level rate limiting and daily budget alerts at the reverse proxy or provider layer.
+Enabling either paid provider also requires `PAID_PROVIDER_USER_DAILY_UNITS` and `PAID_PROVIDER_GLOBAL_DAILY_UNITS`, with the deployment limit at least as large as the user limit. Optional operation costs, circuit thresholds and concurrency controls are documented in `.env.example`. Units are operator-defined relative costs, not currency or token counts. SQLite atomically persists the UTC-day ledgers; deleting a user does not refund deployment usage, and a Google claim merges the guest's personal usage.
+
+Keep production secrets only in the server's `.env.local`; never commit them. Circuit and concurrency state is local to one Node process. Public traffic still needs connection-level reverse-proxy limits plus independent provider-side hard budgets and alerts.
 
 ## Backup and upgrade
 

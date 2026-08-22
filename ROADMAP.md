@@ -18,6 +18,7 @@ Roadmap items are proposals until their acceptance checks pass. We do not advert
 - [x] Let Google OAuth users claim guest progress transactionally with Authorization Code + PKCE.
 - [x] Support JSON export and deletion for self-hosted guest data.
 - [x] Document retention defaults, backups and the Google account privacy flow.
+- [x] Fail closed around paid providers with signed-session revalidation, persistent per-user/global daily budgets, bounded concurrency and recovery circuits.
 
 ## 0.5 — Online rooms
 

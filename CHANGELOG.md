@@ -4,6 +4,15 @@ All notable changes will be documented here.
 
 ## Unreleased
 
+## 0.3.0-beta.15 — 2026-08-22
+
+- Added fail-closed paid-provider access: active signed sessions, atomic per-user and deployment-wide UTC-day budgets in SQLite, and explicit production configuration checks.
+- Added separate AI/voice circuit breakers with half-open probes, stale-result protection and a bounded in-process concurrency ceiling.
+- Added authenticated SHA-256 ElevenLabs caching and single-flight requests so concurrent identical speech is fetched and charged once.
+- Preserved deployment usage across user deletion and merged personal usage during guest-to-Google account claiming without double-counting the global ledger.
+- Moved all paid routes to the Node runtime, strictly sanitized nested Agent observations before charging, and cancelled oversized upstream streams while reading instead of buffering them unboundedly.
+- Expanded route, migration, budget, circuit and deployment-doctor regression coverage to 174 unit and contract tests.
+
 ## 0.3.0-beta.14 — 2026-08-22
 
 - Added versioned cross-device SQLite sync for course mastery, mini-endgames, both memory drills, language and AI pace, with monotonic merging that prevents stale-device rollback.

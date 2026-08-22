@@ -1,5 +1,10 @@
 export const SESSION_COOKIE = 'gd_session';
 export const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30;
+const obviousSecret=/((replace|change)[-_ ]?me|your[-_ ]|example|password|generate|使用密码管理器|至少.*随机)/iu;
+
+export function isProductionSessionSecret(value: string | undefined): value is string {
+  return Boolean(value&&value.length>=24&&!obviousSecret.test(value)&&new Set(value).size>=10);
+}
 
 export interface SessionClaims {
   v: 1;

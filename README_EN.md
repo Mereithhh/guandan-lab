@@ -90,6 +90,8 @@ AI_BASE_URL=https://your-provider.example/v1
 AI_API_KEY=replace-me
 AI_MODEL=your-model
 PAID_PROVIDERS_ENABLED=1
+PAID_PROVIDER_USER_DAILY_UNITS=250
+PAID_PROVIDER_GLOBAL_DAILY_UNITS=5000
 
 ELEVENLABS_API_KEY=replace-me
 ELEVENLABS_VOICE_ID=replace-me
@@ -97,6 +99,10 @@ ELEVENLABS_MODEL_ID=eleven_multilingual_v2
 ```
 
 The compatible Agent endpoint fixes the request path to `/chat/completions`, rejects unsafe private base URLs by default, limits input and output sizes, enforces timeouts and returns only locally validated moves. The ElevenLabs route rejects redirects, validates the audio response, limits its size and returns an explicit browser-speech fallback on failure.
+
+Enabling paid providers also requires `SESSION_SECRET`, `DATABASE_PATH`, and explicit positive per-user and deployment-wide daily budgets; otherwise calls fail closed. SQLite atomically charges relative cost units per UTC day (defaults: Agent 1, review 2, ElevenLabs 1 per 100 characters). These units are not currency or token counts, so set conservative limits from your provider pricing.
+
+AI and voice have separate failure circuits, one half-open probe, and an in-process concurrency cap. Identical ElevenLabs requests use an authenticated hashed cache and single-flight fetch. Daily budgets persist for the single-node deployment, while circuits and concurrency counters are per Node process. Keep reverse-proxy connection limits and provider-side hard budgets and alerts for public traffic.
 
 Post-match model review receives only public play events, finish order and non-hidden deterministic local metrics—never any player's unplayed hand. The model may select only from controlled style and advice codes, which local code maps to reviewed copy; local code also remains authoritative for card-skill score, social score and evidence metrics. Timeout, throttling, free text or malformed output is disclosed in the result dialog and falls back to local evidence.
 

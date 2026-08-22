@@ -10,10 +10,14 @@ The browser owns a deterministic `GameState`; `lib/game` validates every action 
 - The browser calls same-origin API routes and never receives provider credentials.
 - Model output is untrusted. It must match one of the legal moves computed by the rules core; otherwise the deterministic fallback is used.
 - A provider base URL is administrator configuration, not a player preference. Public HTTPS is required by default to reduce SSRF and accidental key exfiltration.
+- Paid routes run in the Node runtime and require a valid signed session that is still active in SQLite. The same transaction revalidates that session and atomically reserves both the user's and deployment's UTC-day budget before any provider request.
+- AI and voice use separate in-process circuits, a single half-open recovery probe and a shared concurrency ceiling. Stale successes cannot close a newer open circuit. ElevenLabs cache keys are SHA-256 hashes, and authentication happens before cache lookup.
 
 ## Self-host persistence
 
 The self-hosted edition uses one Node process and SQLite under `/data`. A signed, HttpOnly guest cookie is created without blocking play; completed training games are written transactionally to `matches`, `match_events` and `analyses`. A bounded `training_profiles` snapshot also contains the mastery course, mini-endgame state, two memory histories, locale and AI pace. Earned progress merges monotonically; snapshot writes use compare-and-swap revisions, and clients rebase only attempts added since their last acknowledged snapshot. A full disjoint history cannot evict the server's bounded 50-item history, while explicit endgame resets use a monotonic epoch. The SQLite write transaction revalidates the live session so an in-flight request cannot recreate a deleted or claimed guest. These personal-learning scores are not competitive or leaderboard claims. SQLite runs with WAL, foreign keys and a busy timeout. This is a single-instance choice, not a horizontal-scaling claim; operators must back up the mounted volume.
+
+Paid-provider usage uses a per-user ledger plus an independent deployment ledger. User deletion cascades personal rows but intentionally cannot lower deployment usage; guest-to-Google claims merge personal usage without charging the deployment twice. Budget persistence is deployment-wide only for processes sharing the same SQLite file. Circuit and concurrency state is per process, so horizontal deployment needs an external coordinator before it can make the same guarantees.
 
 Optional Google login uses Authorization Code + PKCE, a short-lived signed state cookie and fixed Google token/userinfo endpoints. A successful callback merges both guest matches and the training profile into the existing Google profile transactionally and never persists the provider access token. OAuth is offered only when SQLite, the public site URL and both Google credentials are configured.
 

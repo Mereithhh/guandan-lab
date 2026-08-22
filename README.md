@@ -17,7 +17,7 @@ GuanDan Lab 是一个开源的零基础掼蛋训练器。它先用标称 15 分�
 
 ![GuanDan Lab 真实产品演示：训练入口、课程、记牌与 AI 牌桌](./public/walkthrough.gif)
 
-[确定性核心与 32 项一致性检查](./tests/unit/conformance.test.ts) · [公平 AI 的可见信息边界](./docs/ARCHITECTURE.md) · 158 项单元/契约测试 · [beta.5 安全审查记录](./docs/SECURITY_REVIEW_BETA5.md)
+[确定性核心与 32 项一致性检查](./tests/unit/conformance.test.ts) · [公平 AI 的可见信息边界](./docs/ARCHITECTURE.md) · 174 项单元/契约测试 · [beta.15 付费服务安全审查](./docs/SECURITY_REVIEW_BETA15.md)
 
 ## 已经可以做什么
 
@@ -84,6 +84,8 @@ AI_BASE_URL=https://your-provider.example/v1
 AI_API_KEY=replace-me
 AI_MODEL=your-model
 PAID_PROVIDERS_ENABLED=1
+PAID_PROVIDER_USER_DAILY_UNITS=250
+PAID_PROVIDER_GLOBAL_DAILY_UNITS=5000
 
 ELEVENLABS_API_KEY=replace-me
 ELEVENLABS_VOICE_ID=replace-me
@@ -104,7 +106,9 @@ curl -s http://localhost:3000/api/session
 # 查看 agentProvider 与 voiceProvider；响应不会包含 Base URL、模型名或密钥。
 ```
 
-当前匿名限流只适合单实例自托管试用。公开站点在 SQLite/平台级持久配额、日预算和熔断完成前，不应配置可产生费用的生产密钥。
+开启付费服务时，`SESSION_SECRET`、`DATABASE_PATH`、单用户日预算和全站日预算均为必填项，否则服务会拒绝调用 Provider。预算按 UTC 日在 SQLite 中原子扣减；Agent 默认 1 单位、赛后复盘 2 单位、ElevenLabs 每 100 字 1 单位，均可用 `.env.example` 中的变量调整。这些是相对成本单位，不代表实际货币或 Token 数，请按 Provider 价格设置保守上限。
+
+兼容模型与语音各自带有失败熔断、半开单探针和进程内并发上限；ElevenLabs 相同文本会在鉴权后使用哈希缓存和单航班请求。SQLite 日预算是单机持久化的，但熔断器和并发计数属于单个 Node 进程；公开部署仍应在反向代理增加连接级限流，并在 Provider 控制台设置硬预算与告警。
 
 ## 验证
 

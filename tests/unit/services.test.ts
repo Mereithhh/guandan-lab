@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { normalizeBaseUrl, parseAgentMove, providerChatCompletionsUrl } from '../../lib/services/compatible-agent';
 import { elevenLabsSpeechUrl, MAX_TTS_CHARS, normalizeVoiceText } from '../../lib/services/tts';
-import { BodyTooLargeError, consumeRateLimit, isSameOrigin, isSecureRequest, publicRequestOrigin, readJsonBody } from '../../lib/services/http-guard';
+import { BodyTooLargeError, consumeRateLimit, isSameOrigin, isSecureRequest, publicRequestOrigin, readJsonBody,readResponseBytes,ResponseTooLargeError } from '../../lib/services/http-guard';
 import { providerStatus } from '../../lib/services/provider-status';
 
 describe('service boundaries', () => {
@@ -32,6 +32,13 @@ describe('service boundaries', () => {
     await expect(readJsonBody(new Request('https://game.example',{method:'POST',body:'{"text":"too long"}'}),8)).rejects.toBeInstanceOf(BodyTooLargeError);
   });
 
+  it('cancels an upstream response as soon as its streamed byte limit is exceeded',async()=>{
+    let cancelled=false;const stream=new ReadableStream<Uint8Array>({start(controller){controller.enqueue(new Uint8Array(6));controller.enqueue(new Uint8Array(6))},cancel(){cancelled=true}});
+    await expect(readResponseBytes(new Response(stream),10)).rejects.toBeInstanceOf(ResponseTooLargeError);expect(cancelled).toBe(true);
+    let declaredCancelled=false;const declared=new ReadableStream<Uint8Array>({cancel(){declaredCancelled=true}});
+    await expect(readResponseBytes(new Response(declared,{headers:{'content-length':'100'}}),10)).rejects.toBeInstanceOf(ResponseTooLargeError);expect(declaredCancelled).toBe(true);
+  });
+
   it('accepts only a move from the supplied legal set', () => {
     const legal = [['a'], ['b', 'c']];
     expect(parseAgentMove('{"move":["c","b"]}', legal)).toEqual(['c', 'b']);
@@ -49,7 +56,11 @@ describe('service boundaries', () => {
 
   it('reports only provider modes that are fully and safely configured',()=>{
     expect(providerStatus({})).toEqual({agentProvider:'local',voiceProvider:'browser'});
-    expect(providerStatus({PAID_PROVIDERS_ENABLED:'1',AI_BASE_URL:'https://models.example/v1',AI_API_KEY:'secret',AI_MODEL:'coach',ELEVENLABS_API_KEY:'secret',ELEVENLABS_VOICE_ID:'voice'})).toEqual({agentProvider:'compatible',voiceProvider:'elevenlabs'});
+    expect(providerStatus({PAID_PROVIDERS_ENABLED:'1',SESSION_SECRET:'provider-status-secret-long-enough',DATABASE_PATH:'/data/guandan.sqlite',PAID_PROVIDER_USER_DAILY_UNITS:'250',PAID_PROVIDER_GLOBAL_DAILY_UNITS:'5000',AI_BASE_URL:'https://models.example/v1',AI_API_KEY:'secret',AI_MODEL:'coach',ELEVENLABS_API_KEY:'secret',ELEVENLABS_VOICE_ID:'voice'})).toEqual({agentProvider:'compatible',voiceProvider:'elevenlabs'});
+    expect(providerStatus({PAID_PROVIDERS_ENABLED:'1',SESSION_SECRET:'provider-status-secret-long-enough',DATABASE_PATH:'/data/guandan.sqlite',PAID_PROVIDER_USER_DAILY_UNITS:'250',PAID_PROVIDER_GLOBAL_DAILY_UNITS:'5000',PROVIDER_CIRCUIT_OPEN_SECONDS:'1',AI_BASE_URL:'https://models.example/v1',AI_API_KEY:'secret',AI_MODEL:'coach',ELEVENLABS_API_KEY:'secret',ELEVENLABS_VOICE_ID:'voice'})).toEqual({agentProvider:'local',voiceProvider:'browser'});
+    expect(providerStatus({PAID_PROVIDERS_ENABLED:'1',SESSION_SECRET:'provider-status-secret-long-enough',DATABASE_PATH:'/data/guandan.sqlite',PAID_PROVIDER_USER_DAILY_UNITS:'2',PAID_PROVIDER_GLOBAL_DAILY_UNITS:'2',AI_BASE_URL:'https://models.example/v1',AI_API_KEY:'secret',AI_MODEL:'coach',ELEVENLABS_API_KEY:'secret',ELEVENLABS_VOICE_ID:'voice'})).toEqual({agentProvider:'local',voiceProvider:'browser'});
+    expect(providerStatus({PAID_PROVIDERS_ENABLED:'1',SESSION_SECRET:'aaaaaaaaaaaaaaaaaaaaaaaa',DATABASE_PATH:'/data/guandan.sqlite',PAID_PROVIDER_USER_DAILY_UNITS:'250',PAID_PROVIDER_GLOBAL_DAILY_UNITS:'5000',AI_BASE_URL:'https://models.example/v1',AI_API_KEY:'secret',AI_MODEL:'coach'}).agentProvider).toBe('local');
+    expect(providerStatus({PAID_PROVIDERS_ENABLED:'1',AI_BASE_URL:'https://models.example/v1',AI_API_KEY:'secret',AI_MODEL:'coach'}).agentProvider).toBe('local');
     expect(providerStatus({PAID_PROVIDERS_ENABLED:'1',AI_BASE_URL:'http://127.0.0.1:11434/v1',AI_API_KEY:'secret',AI_MODEL:'coach'}).agentProvider).toBe('local');
   });
 });
