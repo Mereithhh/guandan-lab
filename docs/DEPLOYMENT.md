@@ -2,23 +2,11 @@
 
 [English deployment guide](./DEPLOYMENT_EN.md)
 
-GuanDan Lab 支持两种互斥的生产入口：托管 Sites Demo，或你自己的单机 Docker 服务。前者适合公开体验但当前无持久数据库；后者可以启用 SQLite、Google OAuth、付费 AI/TTS 和四人匹配。
+GuanDan Lab 的正式公开入口是项目自己的单机 Docker 服务。官方 Demo `https://guandan.mereith.com` 同时启用 SQLite 游客存档、兼容模型 Agent、ElevenLabs 和四人真人匹配；本地 AI 对局不依赖任何第三方服务，始终可用。开源文档与推广材料不使用 ChatGPT 托管地址。
 
-## 方案 A：Sites 公开 Demo
+## Docker 服务器
 
-当前生产地址是 `https://guandan-bootcamp.miromind-0889.chatgpt.site/`。要把 `guandan.mereith.com` 指向它，请在域名 DNS 控制台添加：
-
-| 类型 | 名称 | 值 |
-| --- | --- | --- |
-| CNAME | `guandan` | `custom-domains.chatgpt.site.` |
-| TXT | `_openai-site-verification.guandan` | `openai-site-verification=LpQXTq6rr1PeVwMmHpEyLpOGK7vVSKHS55QNp9awQAQ` |
-| TXT | `_cf-custom-hostname.guandan` | `1ee5959b-7a27-457c-84ca-24f54938a9fe` |
-
-Cloudflare DNS 用户应先把 CNAME 设为“仅 DNS”，待验证和证书状态变为 active 后再决定是否开启代理。不要同时给 `guandan` 设置 A/AAAA 和 CNAME。
-
-## 方案 B：自己的 Docker 服务器
-
-如果要启用云存档与真人匹配，删除上述 Sites CNAME，改为把 `guandan.mereith.com` 的 A/AAAA 记录指向服务器。服务器需安装 Docker Engine 与 Compose plugin。
+把 `guandan.mereith.com` 的 A/AAAA 记录指向服务器。服务器需安装 Docker Engine 与 Compose plugin。
 
 ```bash
 git clone https://github.com/Mereithhh/guandan-lab.git

@@ -2,23 +2,11 @@
 
 [中文部署指南](./DEPLOYMENT.md)
 
-GuanDan Lab supports two mutually exclusive production paths: the hosted Sites demo, or your own single-node Docker service. The hosted path is convenient for a public demo but currently has no persistent database. Self-hosting can enable SQLite persistence, Google OAuth, paid AI/TTS providers and four-player matching.
+GuanDan Lab's official public target is the project's own single-node Docker service. The demo at `https://guandan.mereith.com` enables SQLite guest progress, compatible-model Agents, ElevenLabs and four-player live matching; complete local AI play remains available without third-party services. Open-source and launch materials do not use a ChatGPT-hosted URL.
 
-## Option A: hosted Sites demo
+## Docker server
 
-The current production URL is `https://guandan-bootcamp.miromind-0889.chatgpt.site/`. To point `guandan.mereith.com` to it, add these records in your DNS console:
-
-| Type | Name | Value |
-| --- | --- | --- |
-| CNAME | `guandan` | `custom-domains.chatgpt.site.` |
-| TXT | `_openai-site-verification.guandan` | `openai-site-verification=LpQXTq6rr1PeVwMmHpEyLpOGK7vVSKHS55QNp9awQAQ` |
-| TXT | `_cf-custom-hostname.guandan` | `1ee5959b-7a27-457c-84ca-24f54938a9fe` |
-
-Cloudflare DNS users should keep the CNAME in **DNS only** mode until domain verification and certificate status are active. Do not create A/AAAA records and a CNAME for `guandan` at the same time.
-
-## Option B: your own Docker server
-
-To enable persistent progress and live matching, remove the Sites CNAME above and point the A/AAAA records for `guandan.mereith.com` to your server. The server needs Docker Engine and the Compose plugin.
+Point the A/AAAA records for `guandan.mereith.com` to your server. The server needs Docker Engine and the Compose plugin.
 
 ```bash
 git clone https://github.com/Mereithhh/guandan-lab.git

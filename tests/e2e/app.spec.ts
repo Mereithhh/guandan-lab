@@ -34,11 +34,6 @@ async function completeCourse(page: Page) {
       await page.getByRole("button", { name: "下一节 →" }).click();
   }
 }
-async function unlockOnline(page: Page) {
-  await page.getByTestId("start-game").click();
-  await completeCourse(page);
-  await page.getByRole("button", { name: /G 掼蛋实验室/u }).click();
-}
 async function countDrillAnswer(page: Page) {
   const prompt = (await page.getByTestId("count-prompt").innerText()).match(
     /共 (\d+) 张(.+)，/u,
@@ -709,7 +704,7 @@ test("a missed count category is retrained with a new public sequence", async ({
     );
   expect(after).not.toBe(before);
 });
-test("four trained guests match into a private server-authoritative room", async ({
+test("four guests match into a private server-authoritative room", async ({
   browser,
 }, testInfo) => {
   test.skip(
@@ -724,11 +719,10 @@ test("four trained guests match into a private server-authoritative room", async
       contexts.map(async (context) => {
         const page = await context.newPage();
         await page.goto("/");
-        await expect(page.getByTestId("online-match")).toContainText(
-          "完成基础验证",
-        );
-        await unlockOnline(page);
         await page.getByTestId("online-match").click();
+        await expect(
+          page.getByRole("heading", { name: "四人真人匹配" }),
+        ).toBeVisible();
         await page.getByTestId("join-online").click();
         return page;
       }),
@@ -758,28 +752,21 @@ test("four trained guests match into a private server-authoritative room", async
     await Promise.all(contexts.map((context) => context.close()));
   }
 });
-test("online lobby is usable on mobile after persisted training", async ({
+test("online lobby is directly usable on mobile while local play remains available", async ({
   page,
 }, testInfo) => {
   test.skip(testInfo.project.name !== "mobile", "mobile-only coverage");
   await page.goto("/");
-  await page.getByTestId("online-match").click();
-  await expect(
-    page.getByRole("heading", { name: "救急上桌路线" }),
-  ).toBeVisible();
-  await completeCourse(page);
-  await page.getByRole("button", { name: /G 掼蛋实验室/u }).click();
-  await expect
-    .poll(() => page.evaluate(() => localStorage.getItem("gd-course-v1")))
-    .toContain('"mastered":[true,true,true,true]');
-  await page.reload();
-  await expect(page.getByTestId("online-match")).not.toContainText(
-    "完成基础验证",
-  );
+  await expect(page.getByTestId("direct-game")).toBeVisible();
   await page.getByTestId("online-match").click();
   await expect(
     page.getByRole("heading", { name: "四人真人匹配" }),
   ).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true);
   await page.getByTestId("join-online").click();
   await expect(page.getByText(/等待牌友 · 已到/u)).toBeVisible();
   await page.getByRole("button", { name: "离开队列" }).click();

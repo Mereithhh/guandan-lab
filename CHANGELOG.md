@@ -4,6 +4,13 @@ All notable changes will be documented here.
 
 ## Unreleased
 
+## 0.3.0-beta.21 — 2026-08-22
+
+- Made `guandan.mereith.com` the only public Demo URL in open-source, deployment and launch materials.
+- Opened the live four-player lobby directly to anonymous guests while preserving the always-available local AI match.
+- Added mobile lobby overflow checks, horizontal hand snap points and a sticky touch action bar.
+- Verified the production-compatible Agent, ElevenLabs audio path and a complete four-guest server-authoritative matchmaking lifecycle.
+
 ## 0.3.0-beta.20 — 2026-08-22
 
 - Removed the over-explained “win the boss” tagline from the README and social metadata.

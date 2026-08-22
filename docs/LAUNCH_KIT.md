@@ -1,6 +1,6 @@
 # GuanDan Lab Launch Kit
 
-这份材料用于开源首发、社区介绍和媒体沟通。任何传播都应指向真实已发布能力；自托管 Beta 与公开 Demo 必须明确区分。
+这份材料用于开源首发、社区介绍和媒体沟通。所有传播只使用项目自托管的 `https://guandan.mereith.com`，并且只描述已经在线验证的能力。
 
 ## 一句话定位
 
@@ -23,7 +23,7 @@ GuanDan Lab（掼蛋实验室）是一个开源的零基础掼蛋训练器：用
 
 > 饭前不掼蛋，等于没吃饭。可如果今晚突然被拉上桌，连顺子和钢板都分不清怎么办？
 >
-> 15 分钟认识规则，3 位 AI 牌友陪练；AI 看不到别人的牌，每个动作还要经过本地规则引擎。你可以调慢 AI 节奏、展开最近出牌、用九宫格练记牌，打完会得到牌技分和社交分两份复盘。
+> 15 分钟认识规则，3 位 AI 牌友陪练，也可以直接进入四人真人大厅；AI 看不到别人的牌，每个动作还要经过本地规则引擎。你可以调慢 AI 节奏、展开最近出牌、用九宫格练记牌，打完会得到牌技分和社交分两份复盘。
 >
 > 临时被拉上桌，先练十五分钟。快速会打，体面上桌。
 
@@ -37,11 +37,11 @@ Tagline: **Learn fast. Play with grace.**
 
 Canonical links:
 
-- Try the public local-mode demo: https://guandan-bootcamp.miromind-0889.chatgpt.site
+- Try the full public demo: https://guandan.mereith.com
 - View or star the source: https://github.com/Mereithhh/guandan-lab
 - Self-hosting guide: https://github.com/Mereithhh/guandan-lab/blob/main/docs/DEPLOYMENT_EN.md
 
-The public demo uses the deterministic local Agent and device voice. Compatible paid models, ElevenLabs, SQLite cloud saves, Google OAuth and live matchmaking are opt-in self-hosted Beta capabilities.
+The public demo runs on the project's own Docker deployment. It offers local AI play, compatible-model Agents, ElevenLabs coaching, SQLite guest progress and direct four-player live matchmaking; every remote move still passes the local rules engine.
 
 Short post:
 
@@ -49,7 +49,7 @@ Short post:
 
 Long-form/Hacker News introduction:
 
-> Guan Dan is a two-deck partnership climbing game with a large decision surface and a steep first-table learning curve. GuanDan Lab separates deterministic rules from probabilistic Agent policy: an AI receives only seat-visible state and legal action IDs, while every returned move is checked locally. The project includes Chinese/English onboarding, 32 competition-profile conformance checks, optional compatible-model and ElevenLabs adapters, Docker + SQLite self-hosting and a server-authoritative four-player Beta. The hosted demo intentionally stays in local mode so it does not pretend paid or persistent services are configured.
+> Guan Dan is a two-deck partnership climbing game with a large decision surface and a steep first-table learning curve. GuanDan Lab separates deterministic rules from probabilistic Agent policy: an AI receives only seat-visible state and legal action IDs, while every returned move is checked locally. The project includes Chinese/English onboarding, 32 competition-profile conformance checks, compatible-model and ElevenLabs adapters, Docker + SQLite persistence and a server-authoritative four-player lobby. The official demo exposes both the full local path and the verified online capabilities.
 
 ## 传播角度
 
@@ -74,8 +74,8 @@ Long-form/Hacker News introduction:
 
 ## 发布检查表
 
-- 公开 Demo 可匿名访问，规则抽屉、AI 牌桌、历史和记牌训练正常。
+- 自托管公开 Demo 可匿名访问，本地 AI、真人大厅、规则、历史、记牌、远程 Agent 与 ElevenLabs 语音均已验证。
 - GitHub CI 通过类型、Lint、单元、覆盖率、构建、E2E 与 Docker 持久化烟测。
-- Release notes 明确标注公开 Demo 与自托管 Beta 的差异。
+- README、Release notes 和所有推广帖只链接 `https://guandan.mereith.com`。
 - 不发布 API key、真实用户牌局、Google 邮箱、生产数据库或私人收款信息。
 - 传播数据只使用可验证指标；不要编造 star、用户数、投资人偏好或胜率。

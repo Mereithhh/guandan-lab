@@ -7,11 +7,11 @@
 [![CI](https://github.com/Mereithhh/guandan-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/Mereithhh/guandan-lab/actions/workflows/ci.yml)
 [![Latest release](https://img.shields.io/github/v/release/Mereithhh/guandan-lab?include_prereleases)](https://github.com/Mereithhh/guandan-lab/releases)
 [![License](https://img.shields.io/github/license/Mereithhh/guandan-lab)](./LICENSE)
-[![Try the public demo](https://img.shields.io/badge/demo-play_now-57e3bd)](https://guandan-bootcamp.miromind-0889.chatgpt.site)
+[![Try the public demo](https://img.shields.io/badge/demo-play_now-57e3bd)](https://guandan.mereith.com)
 
-[▶ Try the demo](https://guandan-bootcamp.miromind-0889.chatgpt.site) · [☆ Star the repo](https://github.com/Mereithhh/guandan-lab) · [◇ Join the discussion](https://github.com/Mereithhh/guandan-lab/discussions/35) · [⌘ Run locally](#quick-start)
+[▶ Try the demo](https://guandan.mereith.com) · [☆ Star the repo](https://github.com/Mereithhh/guandan-lab) · [◇ Join the discussion](https://github.com/Mereithhh/guandan-lab/discussions/35) · [⌘ Run locally](#quick-start)
 
-[Public demo](https://guandan-bootcamp.miromind-0889.chatgpt.site) · [Launch discussion](https://github.com/Mereithhh/guandan-lab/discussions/35) · [Production checklist](https://github.com/Mereithhh/guandan-lab/issues/34) · [Deployment](./docs/DEPLOYMENT_EN.md) · [Roadmap](./ROADMAP.md) · [Architecture](./docs/ARCHITECTURE.md) · [Contributing](./CONTRIBUTING.md)
+[Public demo](https://guandan.mereith.com) · [Launch discussion](https://github.com/Mereithhh/guandan-lab/discussions/35) · [Production checklist](https://github.com/Mereithhh/guandan-lab/issues/34) · [Deployment](./docs/DEPLOYMENT_EN.md) · [Roadmap](./ROADMAP.md) · [Architecture](./docs/ARCHITECTURE.md) · [Contributing](./CONTRIBUTING.md)
 
 GuanDan Lab is an open-source, beginner-first coach for Guan Dan, a Chinese four-player partnership card game played with two decks. It combines a deterministic rules engine, fair-play AI partners, a nominal 15-minute crash-course format, card-counting drills, optional voice coaching and evidence-based match replays.
 
@@ -19,7 +19,7 @@ The default story puts you at a table with “Wang”, but this is not a deliber
 
 ![Real GuanDan Lab walkthrough: training paths, course, memory drill and AI table](./public/walkthrough.gif)
 
-[Deterministic core + 32 conformance checks](./tests/unit/conformance.test.ts) · [Fair-AI visibility boundary](./docs/ARCHITECTURE.md) · 178 unit/contract tests · [beta.15 paid-provider security review](./docs/SECURITY_REVIEW_BETA15.md)
+[Deterministic core + 32 conformance checks](./tests/unit/conformance.test.ts) · [Fair-AI visibility boundary](./docs/ARCHITECTURE.md) · 176 unit/contract tests · [beta.15 paid-provider security review](./docs/SECURITY_REVIEW_BETA15.md)
 
 ## Why this project exists
 
@@ -48,10 +48,11 @@ GuanDan Lab turns those gaps into one verifiable training loop:
 - Same-rank hand stacks, adjustable AI pacing, expandable live play history and one-click legal hints.
 - Installable Web App metadata, search discovery files, truthful structured data and a system share action without tracking parameters.
 - Event-based card-counting, a nine-grid memory drill and complete local match replays.
-- Guest-first use with no registration. When localStorage is retained, the browser saves training locally; self-hosted SQLite uses revision checks and local-delta replay to merge course, endgame, bounded memory, preference and replay progress across devices without letting a stale device relock earned lessons or replace a full server history. Google OAuth claiming and four-player server-authoritative matchmaking remain optional.
+- Guest-first use with no registration. When localStorage is retained, the browser saves training locally; self-hosted SQLite uses revision checks and local-delta replay to merge course, endgame, bounded memory, preference and replay progress across devices without letting a stale device relock earned lessons or replace a full server history. Google OAuth claiming remains optional.
+- The official Docker-hosted demo exposes both complete local AI play and direct four-player server-authoritative matchmaking. Compatible-model Agents, evidence-based match review and ElevenLabs coaching are enabled with local-rule and device-voice fallbacks.
 - Docker deployment with a named SQLite volume and capability smoke tests in CI.
 
-The hosted demo currently runs the local rules Agent and device voice. Paid AI, ElevenLabs, Google OAuth, SQLite cloud saves and online matchmaking are opt-in self-hosted capabilities; the UI reports the active mode instead of pretending they are enabled.
+The official demo is the project-owned deployment at `guandan.mereith.com`; no ChatGPT-hosted URL is used in open-source or launch materials.
 
 ## Quick start
 
@@ -126,7 +127,7 @@ The repository gate covers TypeScript, ESLint, unit and contract tests, coverage
 
 `lib/game` is the deterministic rules core and performs no network or database I/O. Browser and server flows share the same validation logic. The optional online table is server-authoritative: it generates the deal on the server, projects only the current player's hand, uses versioned idempotent actions and supports refresh recovery.
 
-The current self-hosted target is a single Node process with SQLite. The hosted Sites target is designed around D1 and Durable Objects. These deployments share the rules core and network protocol, not a storage implementation. Read [the architecture guide](./docs/ARCHITECTURE.md) before changing trust boundaries.
+The current public target is a single Node process with SQLite. A future multi-instance deployment will need a shared coordination layer while preserving the same rules core and network protocol. Read [the architecture guide](./docs/ARCHITECTURE.md) before changing trust boundaries.
 
 ## Contributing
 

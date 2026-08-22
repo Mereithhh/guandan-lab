@@ -39,10 +39,9 @@ No reproducible P0 or remaining P1 was found in the reviewed scope after remedia
 
 ## Known limits
 
-- The public demo has no production provider keys, cloud database, Google OAuth or online matching enabled.
+- At beta.5, the then-current public demo had no production provider keys, cloud database, Google OAuth or online matching enabled; this is a historical review, not the current deployment status.
 - Anonymous quotas are designed for a single self-hosted instance, not a public multi-tenant paid-provider service.
 - The rules fixtures cover the documented teaching profile, not every regional variant or tournament procedure.
 - Automated checks do not replace runtime monitoring, dependency patching or a professional security assessment.
 
 Future changes are scanned by the repository CodeQL and dependency-review workflow in addition to the normal CI gate.
-
