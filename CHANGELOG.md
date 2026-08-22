@@ -4,6 +4,11 @@ All notable changes will be documented here.
 
 ## Unreleased
 
+## 0.3.0-beta.18 — 2026-08-22
+
+- Restored an always-available direct AI match entry on the home screen while keeping the 15-minute beginner course as the recommended path.
+- Removed the course-completion gate from the full-deal mission card and added desktop/mobile browser coverage for both entry paths.
+
 ## 0.3.0-beta.17 — 2026-08-22
 
 - Added an explicit three-seat LLM Agent mode with distinct server-fixed fictional personas, server-enumerated legal actions, honest local-fallback labels and prompt-injection-resistant public observations.
