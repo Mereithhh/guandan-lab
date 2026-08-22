@@ -26,6 +26,19 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - run: docker build -t guandan-lab:local .
+      - name: Verify the production doctor inside the runtime image
+        run: |
+          DOCTOR_SECRET=ci-doctor-random-secret-with-more-than-32-characters
+          report="$(docker run --rm \
+            -e SITE_URL=https://ci.guandan-lab.org \
+            -e SESSION_SECRET="$DOCTOR_SECRET" \
+            -e DATABASE_PATH=/data/ci.sqlite \
+            -e ONLINE_MATCHING_ENABLED=0 \
+            -e PAID_PROVIDERS_ENABLED=0 \
+            -e TRUST_PROXY=0 \
+            -e AI_ALLOW_PRIVATE_BASE_URL=0 \
+            guandan-lab:local node scripts/doctor.mjs --json)"
+          node -e 'const [raw,secret]=process.argv.slice(1); const report=JSON.parse(raw); if(!report.ready||raw.includes(secret)) process.exit(1)' "$report" "$DOCTOR_SECRET"
       - name: Smoke-test persistent read-only container
         run: |
           cleanup() {

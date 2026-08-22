@@ -36,6 +36,16 @@ ONLINE_MATCHING_ENABLED=1
 TRUST_PROXY=1
 ```
 
+Run the secret-safe static readiness check with the same Docker image that will enter production; the host does not need Node.js:
+
+```bash
+docker compose build
+docker compose run --rm --no-deps web node scripts/doctor.mjs --lang=en
+# For automation, append --json to the previous command
+```
+
+The doctor reports required failures separately from disabled optional features and never prints environment-variable values. It exits non-zero for unsafe HTTPS/session/SQLite settings, partial OAuth/AI/TTS groups, invalid URLs or malformed feature flags. This validates configuration shape only and does not contact Google, model providers or ElevenLabs.
+
 Only enable `TRUST_PROXY=1` when your reverse proxy overwrites incoming client-supplied `X-Forwarded-*` headers. The application container binds only to `127.0.0.1:3000` on the host; do not expose port 3000 directly to the internet.
 
 Start and inspect the service:
@@ -79,8 +89,13 @@ Keep production secrets only in the server's `.env.local`; never commit them. Be
 For a consistent single-node backup, briefly stop the web service and copy the named volume:
 
 ```bash
+GUANDAN_CONTAINER="$(docker compose ps -q web)"
+test -n "$GUANDAN_CONTAINER"
+GUANDAN_VOLUME="$(docker inspect "$GUANDAN_CONTAINER" --format '{{range .Mounts}}{{if eq .Destination "/data"}}{{.Name}}{{end}}{{end}}')"
+test -n "$GUANDAN_VOLUME"
 docker compose stop web
-docker run --rm -v guandan_guandan-data:/data -v "$PWD/backups:/backup" alpine \
+mkdir -p backups
+docker run --rm -v "$GUANDAN_VOLUME:/data:ro" -v "$PWD/backups:/backup" alpine \
   tar -czf /backup/guandan-$(date +%Y%m%d-%H%M%S).tar.gz -C /data .
 docker compose start web
 ```

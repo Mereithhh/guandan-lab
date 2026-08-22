@@ -4,6 +4,12 @@ All notable changes will be documented here.
 
 ## Unreleased
 
+## 0.3.0-beta.12 — 2026-08-22
+
+- Added `npm run doctor`, a secret-safe production readiness check for HTTPS, signed sessions, SQLite, Google OAuth, online matching, compatible-model Agents, ElevenLabs and support links.
+- Added JSON output and non-zero failure semantics for CI/operations without contacting or charging third-party providers.
+- Documented the readiness workflow for Docker operators in Chinese and English, backed by nineteen deployment-contract cases.
+
 ## 0.3.0-beta.11 — 2026-08-22
 
 - Added a persistent mobile GitHub/Star entry so public-demo visitors can reach the open-source project without scrolling through the full home page.
