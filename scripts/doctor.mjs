@@ -19,7 +19,7 @@ function partial(env,keys){const present=keys.filter(key=>Boolean(value(env,key)
 const EN={
   site_url:['Public URL','SITE_URL uses public HTTPS.','Set SITE_URL to a real public HTTPS URL without embedded credentials.'],session:['Session and cloud saves','The session secret passed length and placeholder checks; verify it came from a random generator.','Generate a random SESSION_SECRET with at least 24 characters.'],database:['SQLite','SQLite is stored in the persistent /data volume.','Set DATABASE_PATH to a file under /data, for example /data/guandan.sqlite.'],google:['Google OAuth','Fields are present but not network-verified; register /api/auth/google/callback.','Leave both Google fields empty, or set a real client ID and secret together.'],online:['Live matching','Server-authoritative four-player matching is enabled.','Matching is disabled, or its session/SQLite dependency is invalid.'],paid:['Paid-provider gate','Paid providers are enabled behind durable safety controls.','Keep the gate off, or configure at least one complete provider group.'],budget:['Paid-provider budget','Durable per-user and deployment-wide daily budgets are configured.','Set valid positive daily unit budgets and bounded circuit/concurrency options.'],ai:['Compatible-model Agent','The model endpoint shape is valid.','Set all three AI fields with a real public HTTPS endpoint, or explicitly allow a trusted private endpoint.'],tts:['ElevenLabs TTS','The voice fields are complete.','Set both ElevenLabs fields to real values, or leave both empty.'],support:['Support QR','The public support-link shape is valid.','Use a real public HTTPS SUPPORT_URL, or leave it empty.']
 };
-function englishReport(report){return{...report,checks:report.checks.map(check=>{const translated=EN[check.id];if(translated)return{...check,label:translated[0],message:check.status==='pass'?translated[1]:translated[2]};if(check.id.includes('_enabled')||check.id==='trust_proxy'||check.id==='ai_allow_private_base_url')return{...check,message:`${check.label} must be exactly 0 or 1 with no surrounding spaces.`};return check})}}
+function englishReport(report){return{...report,checks:report.checks.map(check=>{const translated=EN[check.id];if(check.id==='tts'&&check.message.includes('三位牌友'))return{...check,label:translated[0],message:check.status==='pass'?'Chinese/English language following and three distinct player voices are configured.':'Speech works, but the three AI players do not yet have three distinct voices.'};if(translated)return{...check,label:translated[0],message:check.status==='pass'?translated[1]:translated[2]};if(check.id.includes('_enabled')||check.id==='trust_proxy'||check.id==='ai_allow_private_base_url')return{...check,message:`${check.label} must be exactly 0 or 1 with no surrounding spaces.`};return check})}}
 
 export function assessDeployment(env,options={}){
   const checks=[];
@@ -53,7 +53,7 @@ export function assessDeployment(env,options={}){
     checks.push(item('online','真人匹配',coreReady?PASS:FAIL,coreReady?'已启用服务端权威四人匹配。':'真人匹配需要有效会话密钥和 SQLite。'));
   }else checks.push(item('online','真人匹配',WARN,'未启用；AI 单机训练仍可使用。'));
 
-  const aiKeys=['AI_BASE_URL','AI_API_KEY','AI_MODEL'],voiceKeys=['ELEVENLABS_API_KEY','ELEVENLABS_VOICE_ID'];
+  const aiKeys=['AI_BASE_URL','AI_API_KEY','AI_MODEL'],voiceKeys=['ELEVENLABS_API_KEY','ELEVENLABS_VOICE_ID'],characterVoiceKeys=['ELEVENLABS_VOICE_ID_WANG','ELEVENLABS_VOICE_ID_GU','ELEVENLABS_VOICE_ID_LIN'];
   if(!enabled(env,'PAID_PROVIDERS_ENABLED'))checks.push(item('paid','付费服务总开关',WARN,'未启用；兼容模型与 ElevenLabs 会安全回退到本地 AI 和设备语音。'));
   else{
     if(!complete(env,aiKeys)&&!complete(env,voiceKeys)&&!partial(env,aiKeys)&&!partial(env,voiceKeys))checks.push(item('paid','付费服务总开关',FAIL,'已开启付费服务，但没有配置兼容模型或 ElevenLabs。'));
@@ -79,9 +79,13 @@ export function assessDeployment(env,options={}){
     else checks.push(item('ai','兼容模型 Agent',FAIL,'模型端点应为公网 HTTPS；私网 HTTP 需显式允许。'));
   }else checks.push(item('ai','兼容模型 Agent',WARN,'未配置；确定性本地 Agent 仍可使用。'));
 
+  const configuredVoiceKeys=[...voiceKeys,...characterVoiceKeys].filter(key=>value(env,key));
   if(partial(env,voiceKeys))checks.push(item('tts','ElevenLabs TTS',FAIL,'ELEVENLABS_API_KEY 与 ELEVENLABS_VOICE_ID 必须同时设置。'));
-  else if(complete(env,voiceKeys)&&voiceKeys.some(key=>placeholder.test(value(env,key))))checks.push(item('tts','ElevenLabs TTS',FAIL,'ElevenLabs 配置仍包含示例值。'));
-  else if(complete(env,voiceKeys))checks.push(item('tts','ElevenLabs TTS',enabled(env,'PAID_PROVIDERS_ENABLED')?PASS:WARN,'语音配置完整；未启用时仍回退到设备语音。'));
+  else if(configuredVoiceKeys.some(key=>placeholder.test(value(env,key))))checks.push(item('tts','ElevenLabs TTS',FAIL,'ElevenLabs 配置仍包含示例值。'));
+  else if(complete(env,voiceKeys)){
+    const fallback=value(env,'ELEVENLABS_VOICE_ID'),characterVoices=characterVoiceKeys.map(key=>value(env,key)||fallback),distinctVoices=new Set(characterVoices).size;
+    checks.push(item('tts','ElevenLabs TTS',enabled(env,'PAID_PROVIDERS_ENABLED')&&distinctVoices===3?PASS:WARN,distinctVoices===3?'中英文语言跟随与三位牌友独立音色已配置。':'语音可用，但三位牌友尚未配置三种不同音色。'));
+  }
   else checks.push(item('tts','ElevenLabs TTS',WARN,'未配置；字幕和设备语音仍可使用。'));
 
   const support=value(env,'SUPPORT_URL'),supportUrl=url(support);

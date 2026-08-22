@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { normalizeBaseUrl, parseAgentMove, providerChatCompletionsUrl } from '../../lib/services/compatible-agent';
-import { elevenLabsSpeechUrl, MAX_TTS_CHARS, normalizeVoiceText } from '../../lib/services/tts';
+import { elevenLabsModelId, elevenLabsSpeechUrl, elevenLabsVoiceId, MAX_TTS_CHARS, normalizeTtsLocale, normalizeTtsSpeaker, normalizeVoiceText, resolveVoiceLocale, ttsSpeakerForSeat } from '../../lib/services/tts';
 import { BodyTooLargeError, consumeRateLimit, isSameOrigin, isSecureRequest, publicRequestOrigin, readJsonBody,readResponseBytes,ResponseTooLargeError } from '../../lib/services/http-guard';
 import { providerStatus } from '../../lib/services/provider-status';
 
@@ -10,6 +10,17 @@ describe('service boundaries', () => {
     expect(normalizeVoiceText('')).toBeNull();
     expect(normalizeVoiceText('牌'.repeat(400))).toHaveLength(MAX_TTS_CHARS);
     expect(elevenLabsSpeechUrl('voice/a')).toContain('voice%2Fa');
+    expect(normalizeTtsLocale('en')).toBe('en');
+    expect(normalizeTtsLocale('hacked')).toBe('zh');
+    expect(resolveVoiceLocale('这手牌打得漂亮 Agent', 'en')).toBe('zh');
+    expect(resolveVoiceLocale('Wang takes the lead 王总', 'zh')).toBe('en');
+    expect(normalizeTtsSpeaker('lin')).toBe('lin');
+    expect(normalizeTtsSpeaker('../voice')).toBe('coach');
+    expect([0,1,2,3].map(ttsSpeakerForSeat)).toEqual(['coach','wang','gu','lin']);
+    expect(elevenLabsVoiceId({ELEVENLABS_VOICE_ID:'default',ELEVENLABS_VOICE_ID_GU:'gu'},'gu')).toBe('gu');
+    expect(elevenLabsVoiceId({ELEVENLABS_VOICE_ID:'default'},'wang')).toBe('default');
+    expect(elevenLabsModelId({ELEVENLABS_MODEL_ID_ZH:'zh-model',ELEVENLABS_MODEL_ID:'base'},'zh')).toBe('zh-model');
+    expect(elevenLabsModelId({},'en')).toBe('eleven_flash_v2_5');
   });
 
   it('guards same-origin service calls and fixed-window quotas', () => {

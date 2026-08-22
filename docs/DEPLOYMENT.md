@@ -67,7 +67,7 @@ Caddy 会自动申请和续期证书。Nginx 用户应把 `Host`、`X-Forwarded-
 
 - Google OAuth 回调：`https://guandan.mereith.com/api/auth/google/callback`
 - 兼容模型：`AI_BASE_URL`、`AI_API_KEY`、`AI_MODEL`、`PAID_PROVIDERS_ENABLED=1`
-- ElevenLabs：`ELEVENLABS_API_KEY`、`ELEVENLABS_VOICE_ID`
+- ElevenLabs：`ELEVENLABS_API_KEY`、回退音色 `ELEVENLABS_VOICE_ID`。用 `ELEVENLABS_VOICE_ID_WANG`、`ELEVENLABS_VOICE_ID_GU`、`ELEVENLABS_VOICE_ID_LIN` 为三位牌友配置不同音色；客户端会按中英文传递语言，默认 `eleven_flash_v2_5`，也可用 `ELEVENLABS_MODEL_ID_ZH` / `ELEVENLABS_MODEL_ID_EN` 分别覆盖模型。
 - 自愿支持二维码：把公开收款或赞助页面填入 `SUPPORT_URL`
 
 启用任一付费 Provider 时还必须设置 `PAID_PROVIDER_USER_DAILY_UNITS` 与 `PAID_PROVIDER_GLOBAL_DAILY_UNITS`；后者不得小于前者。可选成本、熔断与并发参数见 `.env.example`。单位是管理员定义的相对成本，不是货币或 Token 数。预算按 UTC 日在 SQLite 中持久化、原子扣减；删号不会返还全站预算，游客认领 Google 账户时会合并个人用量。
