@@ -2,9 +2,11 @@
 
 > 快速会打，体面上桌。不是教你赢老板，是教你成为大家愿意再约的搭档。
 
-[在线体验](https://guandan-bootcamp.miromind-0889.chatgpt.site) · [路线图](./ROADMAP.md) · [隐私说明](./PRIVACY.md) · [参与贡献](./CONTRIBUTING.md)
+[在线体验](https://guandan-bootcamp.miromind-0889.chatgpt.site) · [路线图](./ROADMAP.md) · [Launch Kit](./docs/LAUNCH_KIT.md) · [隐私说明](./PRIVACY.md) · [参与贡献](./CONTRIBUTING.md)
 
 GuanDan Lab 是一个开源的零基础掼蛋训练器。它把确定性的竞技规则引擎、不会偷看牌的 AI 陪练、记牌训练和逐手复盘放在同一个 15 分钟学习路径里。默认场景是陪虚构角色“陈总”上桌：目标是节奏舒服、配合清楚、牌品可靠，而不是故意输牌或暗示牌情。
+
+![GuanDan Lab 像素风牌桌宣传插画](./public/launch-poster.png)
 
 ## 已经可以做什么
 
@@ -90,9 +92,9 @@ npm run test:e2e
 ## 项目路线
 
 - `0.2`：开源基础、陈总训练场景、兼容 AI Provider、ElevenLabs TTS、Docker。
-- `0.3`：5–7 张迷你残局、动态教练、真实事件记牌训练、角色化 Agent。
-- `0.4`：游客云存档、SQLite、自助导出/删除与 Google OAuth 数据认领已进入自托管预览。
-- `0.5`：服务端权威四人匹配、隐私投影和轮询重连已进入自托管预览；超时、投降和举报仍在开发。
+- `0.3 beta`：游客云存档、SQLite、Google OAuth 数据认领、服务端权威四人匹配与轮询重连进入自托管预览。
+- `0.4`：5–7 张迷你残局、真实事件记牌训练、角色化 Agent 与掉线 AI 托管。
+- `0.5`：举报、观战、稳定房间协议与多实例协调。
 - `1.0`：规则变体插件、Agent 锦标赛、稳定协议与可复用规则 SDK。
 
 路线图不是已上线能力。完整状态和验收标准见 [ROADMAP.md](./ROADMAP.md)。
