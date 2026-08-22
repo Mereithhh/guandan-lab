@@ -17,7 +17,7 @@ GuanDan Lab（掼蛋实验室）是一个开源的零基础掼蛋训练器：用
 
 ## 30 秒介绍
 
-很多人第一次接触掼蛋，不是为了比赛，而是突然被叫上桌。传统规则文章很长，普通游戏又不会解释为什么。GuanDan Lab 把规则、合法提示、三位 AI 牌友、九宫格记牌和证据化复盘放进一条 15 分钟路径。默认角色“陈总”完全虚构；系统训练节奏、搭档意识与牌桌礼仪，不奖励故意输牌、暗号或偷看隐藏信息。
+很多人第一次接触掼蛋，不是为了比赛，而是突然被叫上桌。传统规则文章很长，普通游戏又不会解释为什么。GuanDan Lab 先提供标称 15 分钟的核心规则课程，之后再进入合法提示、三位 AI 牌友、九宫格记牌和证据化复盘。默认角色“陈总”完全虚构；系统训练节奏、搭档意识与牌桌礼仪，不奖励故意输牌、暗号或偷看隐藏信息。
 
 ## 可直接发布的中文首发帖
 
@@ -35,6 +35,22 @@ GuanDan Lab（掼蛋实验室）是一个开源的零基础掼蛋训练器：用
 
 Tagline: **Learn fast. Play with grace.**
 
+Canonical links:
+
+- Try the public local-mode demo: https://guandan-bootcamp.miromind-0889.chatgpt.site
+- View or star the source: https://github.com/Mereithhh/guandan-lab
+- Self-hosting guide: https://github.com/Mereithhh/guandan-lab/blob/main/docs/DEPLOYMENT_EN.md
+
+The public demo uses the deterministic local Agent and device voice. Compatible paid models, ElevenLabs, SQLite cloud saves, Google OAuth and live matchmaking are opt-in self-hosted Beta capabilities.
+
+Short post:
+
+> I built GuanDan Lab, an open-source beginner coach for the Chinese four-player partnership game Guan Dan. Learn the core decisions in a 15-minute crash-course format, then practise a full 108-card deal with fair AI, slow the table down, inspect play history, train card counting and replay every move. Learn fast. Play with grace.
+
+Long-form/Hacker News introduction:
+
+> Guan Dan is a two-deck partnership climbing game with a large decision surface and a steep first-table learning curve. GuanDan Lab separates deterministic rules from probabilistic Agent policy: an AI receives only seat-visible state and legal action IDs, while every returned move is checked locally. The project includes Chinese/English onboarding, 32 competition-profile conformance checks, optional compatible-model and ElevenLabs adapters, Docker + SQLite self-hosting and a server-authoritative four-player Beta. The hosted demo intentionally stays in local mode so it does not pretend paid or persistent services are configured.
+
 ## 传播角度
 
 1. **临时上桌的真实焦虑**：不是“成为职业高手”，而是“不让全桌等我”。
@@ -46,11 +62,12 @@ Tagline: **Learn fast. Play with grace.**
 ## 素材清单
 
 - `public/launch-poster.png`：无文字横版牌桌主视觉，适合文章头图与社交媒体。
-- `public/walkthrough.gif`：真实产品界面演示，依次展示入口、课程、记牌和 AI 整局。
+- `public/walkthrough.gif`：真实产品界面演示，依次展示入口、课程、记牌和 AI 牌桌流程。
 - `public/screenshots/`：主页、课程、记牌和 AI 牌桌的真实 1440×900 截图。
 - `public/og.png`：站点链接预览图。
 - `public/characters.jpg`：陈总、小顾、林姐与学员的角色合照。
 - `public/course-storyboard.jpg`：认牌、决策、配合、记忆四步学习故事，适合课程介绍与长图配图。
+- `public/social-transformation.jpg`：从临时上桌紧张到训练后从容配合的左右对照主视觉，适合英文发布、博客和社交媒体。
 - `public/favicon.svg`：项目图标。
 
 这些图片是为本项目生成的原创像素风素材。对外使用时不要把虚构角色描述成真实企业家、投资人或公众人物。

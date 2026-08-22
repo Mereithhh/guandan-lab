@@ -7,6 +7,7 @@ The repository does not bundle stock photography, commercial card art or third-p
 | `public/characters.jpg` | Original fictional pixel-art cast created for GuanDan Lab | CC BY 4.0 |
 | `public/launch-poster.png` | Original campaign illustration generated for this project with OpenAI ImageGen and art-directed by the maintainers | CC BY 4.0 |
 | `public/course-storyboard.jpg` | Original four-panel mastery-course illustration generated for this project with OpenAI ImageGen and art-directed by the maintainers | CC BY 4.0 |
+| `public/social-transformation.jpg` | Original before/after training social launch illustration generated for this project with OpenAI ImageGen and art-directed by the maintainers | CC BY 4.0 |
 | `public/og.png` | Original project social preview | CC BY 4.0 |
 | `public/favicon.svg` | Original project mark | CC BY 4.0 |
 | `public/screenshots/*.png` | Real captures of the repository's running UI | CC BY 4.0 |
