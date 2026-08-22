@@ -4,6 +4,14 @@ All notable changes will be documented here.
 
 ## Unreleased
 
+## 0.3.0-beta.16 — 2026-08-22
+
+- Marked the red-heart level card as “配” on the table and exposed its wild-card meaning to assistive technology.
+- Made one-tap hints explain the exact wild-card substitution instead of only naming the resulting combination.
+- Named the winning team, finish pattern, upgrade owner and learner outcome in round results, replays and finished coach narration.
+- Replaced raw shuffle metadata in new deal events and kept reproducibility details behind a collapsed evidence control; legacy replay notes are sanitized too.
+- Expanded unit and contract coverage to 178 tests and browser coverage to 36 passing desktop/mobile flows with 10 intentional device skips.
+
 ## 0.3.0-beta.15 — 2026-08-22
 
 - Added fail-closed paid-provider access: active signed sessions, atomic per-user and deployment-wide UTC-day budgets in SQLite, and explicit production configuration checks.

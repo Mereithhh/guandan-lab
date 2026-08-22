@@ -41,3 +41,6 @@ html:not([data-hydrated="true"]) button{pointer-events:none}
 @media(max-width:767px){.rank-group .playing-card{margin-left:-3px}}
 @media(max-width:767px){.puzzle-counts{grid-template-columns:1fr 1fr}.puzzle-table{grid-template-columns:1fr}.puzzle-table>div{min-height:100px}.puzzle-panel .lesson-option{align-items:flex-start;flex-direction:column}.puzzle-panel h2{font-size:23px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.playing-card.wild-card{border-color:#f59e0b;box-shadow:0 0 0 2px #fde68a,2px 3px 0 rgb(0 0 0 / 35%)}
+.wild-badge{position:absolute;right:2px;top:2px;border:1px solid #7c2d12;background:#fbbf24;padding:1px 2px;color:#7c2d12;font-size:8px;line-height:1;font-weight:900}
+.replay-evidence{margin-top:10px;color:#64748b;font-size:10px}.replay-evidence summary{cursor:pointer;font-weight:900}.replay-evidence code{display:block;margin-top:5px;overflow-wrap:anywhere}
