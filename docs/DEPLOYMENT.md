@@ -44,7 +44,7 @@ docker compose ps
 curl --fail http://127.0.0.1:3000/api/session
 ```
 
-返回 JSON 中应包含 `"persistent":true`。若为 false，先检查 `SESSION_SECRET` 长度和 `/data` 命名卷权限。
+Compose 会把 `.env.local` 直接传给容器，不会用宿主机空变量覆盖其中的会话、OAuth、在线匹配、AI 或 TTS 配置。返回 JSON 中应包含 `"persistent":true`；还可检查 `googleOAuth`、`onlineMatching`、`agentProvider` 与 `voiceProvider`。该接口不会返回 Base URL、模型名或任何密钥。若 `persistent` 为 false，先检查 `SESSION_SECRET` 长度和 `/data` 命名卷权限。
 
 ## TLS 反向代理
 

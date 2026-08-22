@@ -2,13 +2,15 @@ import { createGuestSession, expiredSessionCookie, readCookie, SESSION_COOKIE, s
 import { isSessionActive, openProgressDatabase, revokeSession, upsertSession } from '@/lib/services/progress-store';
 import { consumeRateLimit, isSameOrigin, isSecureRequest, requestClientKey } from '@/lib/services/http-guard';
 import { getQueueStatus, leaveMatchmaking } from '@/lib/services/online-store';
+import { providerStatus } from '@/lib/services/provider-status';
 
 export const runtime = 'edge';
 
 export async function GET(request: Request) {
   if (!consumeRateLimit(requestClientKey(request, 'session', process.env.TRUST_PROXY === '1'), 120, 60 * 60_000)) return Response.json({ error: '会话请求过于频繁' }, { status: 429 });
+  const providers=providerStatus(process.env);
   const secret = process.env.SESSION_SECRET;
-  if (!secret || secret.length < 24) return Response.json({ mode: 'local', persistent: false, googleOAuth: false, onlineMatching: false, profile: null });
+  if (!secret || secret.length < 24) return Response.json({ mode: 'local', persistent: false, googleOAuth: false, onlineMatching: false, profile: null, ...providers });
   let database = null;
   try {
     database = await openProgressDatabase();
@@ -21,7 +23,7 @@ export async function GET(request: Request) {
   const googleOAuth = persistent && Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.SITE_URL);
   const onlineMatching = persistent && process.env.ONLINE_MATCHING_ENABLED === '1';
   const onlineStatus = onlineMatching && database ? getQueueStatus(database, session.claims.userId) : { status: 'idle' as const };
-  const response = Response.json({ mode: session.claims.kind, persistent, googleOAuth, onlineMatching, onlineStatus, profile: { id: session.claims.userId, displayName: session.claims.displayName } });
+  const response = Response.json({ mode: session.claims.kind, persistent, googleOAuth, onlineMatching, onlineStatus, profile: { id: session.claims.userId, displayName: session.claims.displayName }, ...providers });
   if (session.token) response.headers.append('set-cookie', sessionCookie(session.token, isSecureRequest(request)));
   response.headers.set('cache-control', 'private, no-store');
   return response;

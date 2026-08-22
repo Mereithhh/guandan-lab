@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { normalizeBaseUrl, parseAgentMove, providerChatCompletionsUrl } from '../../lib/services/compatible-agent';
 import { elevenLabsSpeechUrl, MAX_TTS_CHARS, normalizeVoiceText } from '../../lib/services/tts';
 import { BodyTooLargeError, consumeRateLimit, isSameOrigin, isSecureRequest, publicRequestOrigin, readJsonBody } from '../../lib/services/http-guard';
+import { providerStatus } from '../../lib/services/provider-status';
 
 describe('service boundaries', () => {
   it('normalizes and bounds TTS text', () => {
@@ -43,5 +44,11 @@ describe('service boundaries', () => {
     expect(providerChatCompletionsUrl('https://user:pass@example.com/v1')).toBeNull();
     expect(providerChatCompletionsUrl('https://100.64.0.1/v1')).toBeNull();
     expect(providerChatCompletionsUrl('https://[::ffff:127.0.0.1]/v1')).toBeNull();
+  });
+
+  it('reports only provider modes that are fully and safely configured',()=>{
+    expect(providerStatus({})).toEqual({agentProvider:'local',voiceProvider:'browser'});
+    expect(providerStatus({PAID_PROVIDERS_ENABLED:'1',AI_BASE_URL:'https://models.example/v1',AI_API_KEY:'secret',AI_MODEL:'coach',ELEVENLABS_API_KEY:'secret',ELEVENLABS_VOICE_ID:'voice'})).toEqual({agentProvider:'compatible',voiceProvider:'elevenlabs'});
+    expect(providerStatus({PAID_PROVIDERS_ENABLED:'1',AI_BASE_URL:'http://127.0.0.1:11434/v1',AI_API_KEY:'secret',AI_MODEL:'coach'}).agentProvider).toBe('local');
   });
 });

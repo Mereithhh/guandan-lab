@@ -11,6 +11,8 @@
 # testing
 /coverage
 /test-results
+/.playwright-cli/
+/output/
 *.tsbuildinfo
 
 # next.js

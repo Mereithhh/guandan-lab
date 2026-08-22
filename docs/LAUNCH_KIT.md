@@ -27,7 +27,7 @@ GuanDan Lab（掼蛋实验室）是一个开源的零基础掼蛋训练器：用
 >
 > 快速会打，体面上桌。不是教你赢老板，是教你成为大家愿意再约的搭档。
 
-推荐附上在线体验、GitHub 仓库和 `public/launch-poster.png`。
+推荐附上在线体验、GitHub 仓库和 `public/walkthrough.gif`；需要纯视觉头图时使用 `public/launch-poster.png`。
 
 ## English launch copy
 
@@ -46,8 +46,11 @@ Tagline: **Learn fast. Play with grace.**
 ## 素材清单
 
 - `public/launch-poster.png`：无文字横版牌桌主视觉，适合文章头图与社交媒体。
+- `public/walkthrough.gif`：真实产品界面演示，依次展示入口、课程、记牌和 AI 整局。
+- `public/screenshots/`：主页、课程、记牌和 AI 牌桌的真实 1440×900 截图。
 - `public/og.png`：站点链接预览图。
-- `public/characters.png`：陈总、小顾、林姐与学员的角色合照。
+- `public/characters.jpg`：陈总、小顾、林姐与学员的角色合照。
+- `public/course-storyboard.jpg`：认牌、决策、配合、记忆四步学习故事，适合课程介绍与长图配图。
 - `public/favicon.svg`：项目图标。
 
 这些图片是为本项目生成的原创像素风素材。对外使用时不要把虚构角色描述成真实企业家、投资人或公众人物。

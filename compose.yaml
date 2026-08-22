@@ -1,6 +1,7 @@
 services:
   web:
     build: .
+    image: guandan-lab:local
     init: true
     restart: unless-stopped
     ports:
@@ -8,13 +9,6 @@ services:
     env_file:
       - path: .env.local
         required: false
-    environment:
-      SITE_URL: ${SITE_URL:-http://localhost:3000}
-      DATABASE_PATH: ${DATABASE_PATH:-/data/guandan.sqlite}
-      SESSION_SECRET: ${SESSION_SECRET:-}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
-      ONLINE_MATCHING_ENABLED: ${ONLINE_MATCHING_ENABLED:-0}
     read_only: true
     tmpfs:
       - /tmp:size=64m
