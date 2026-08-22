@@ -4,6 +4,14 @@ All notable changes will be documented here.
 
 ## Unreleased
 
+## 0.3.0-beta.17 — 2026-08-22
+
+- Added an explicit three-seat LLM Agent mode with distinct server-fixed fictional personas, server-enumerated legal actions, honest local-fallback labels and prompt-injection-resistant public observations.
+- Replaced the generic position game with a real-hand nine-cell key-card counter: opening subtraction, public-card snapshot updates, 18-point scoring and backward-compatible score denominators.
+- Changed same-rank cards into upright physical-style piles while preserving individual selection on desktop and mobile.
+- Replaced the boss portrait with a safely cropped, completely original fictional pixel avatar generated without a real-person reference.
+- Documented the evidence boundary between published memory-method references, the popular extended 3×3 layout and official deck counts.
+
 ## 0.3.0-beta.16 — 2026-08-22
 
 - Marked the red-heart level card as “配” on the table and exposed its wild-card meaning to assistive technology.
