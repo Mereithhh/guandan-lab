@@ -6,7 +6,7 @@ import { providerStatus } from '../../lib/services/provider-status';
 
 describe('service boundaries', () => {
   it('normalizes and bounds TTS text', () => {
-    expect(normalizeVoiceText('  陈总，  这手漂亮！ ')).toBe('陈总， 这手漂亮！');
+    expect(normalizeVoiceText('  王总，  这手漂亮！ ')).toBe('王总， 这手漂亮！');
     expect(normalizeVoiceText('')).toBeNull();
     expect(normalizeVoiceText('牌'.repeat(400))).toHaveLength(MAX_TTS_CHARS);
     expect(elevenLabsSpeechUrl('voice/a')).toContain('voice%2Fa');

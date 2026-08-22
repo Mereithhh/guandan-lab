@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { remotePersonaInstruction } from "../../lib/game/ai";
 
-describe("fictional server-side agent personas", () => {
+describe("server-side agent personas", () => {
   it("gives all three seats distinct, bounded policies with the same fair-play guard", () => {
     const prompts = ["control", "partnerFirst", "tempo"].map((id) =>
       remotePersonaInstruction(id as "control" | "partnerFirst" | "tempo"),
@@ -12,8 +12,8 @@ describe("fictional server-side agent personas", () => {
       expect(prompt).toContain("不得故意放水");
       expect(prompt).not.toMatch(/陈天桥|Tianqiao|Apodex|内部语料|盛大/u);
     }
-    expect(prompts[0]).toContain("虚构角色“陈总”");
-    expect(prompts[1]).toContain("虚构角色“小顾”");
-    expect(prompts[2]).toContain("虚构角色“林姐”");
+    expect(prompts[0]).toContain("你是“王总”的决策层");
+    expect(prompts[1]).toContain("你是“小顾”的决策层");
+    expect(prompts[2]).toContain("你是“林姐”的决策层");
   });
 });

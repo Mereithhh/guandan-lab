@@ -6,6 +6,9 @@ The repository does not bundle stock photography, commercial card art or third-p
 | --- | --- | --- |
 | `public/characters.jpg` | Original fictional pixel-art cast created for GuanDan Lab | CC BY 4.0 |
 | `public/chen-avatar-v2.png` | Original fictional pixel-art manager generated with OpenAI ImageGen without a real-person image reference | CC BY 4.0 |
+| `public/avatar-wang-v3.png` | Pixel-art avatar generated with OpenAI ImageGen from a user-supplied appearance reference | CC BY 4.0* |
+| `public/avatar-gu-v3.png` | Pixel-art avatar generated with OpenAI ImageGen from a user-supplied appearance reference | CC BY 4.0* |
+| `public/avatar-lin-v3.png` | Pixel-art avatar generated with OpenAI ImageGen from a user-supplied appearance reference | CC BY 4.0* |
 | `public/launch-poster.png` | Original campaign illustration generated for this project with OpenAI ImageGen and art-directed by the maintainers | CC BY 4.0 |
 | `public/course-storyboard.jpg` | Original four-panel mastery-course illustration generated for this project with OpenAI ImageGen and art-directed by the maintainers | CC BY 4.0 |
 | `public/social-transformation.jpg` | Original before/after training social launch illustration generated for this project with OpenAI ImageGen and art-directed by the maintainers | CC BY 4.0 |
@@ -14,8 +17,8 @@ The repository does not bundle stock photography, commercial card art or third-p
 | `public/screenshots/*.png` | Real captures of the repository's running UI | CC BY 4.0 |
 | `public/walkthrough.gif` | Real product walkthrough assembled from the captured UI frames | CC BY 4.0 |
 
-The generated manager avatar is not intended to identify, reproduce or represent any real person. The public “陈总” character remains fictional.
+The three v3 avatars use user-supplied photographs only as appearance references. Contributors adding or replacing reference-based assets are responsible for having permission to use their source material.
 
-To the extent copyright or related rights exist in these assets, the maintainers make them available under [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/). Attribution may use “GuanDan Lab contributors”. The Apache-2.0 license continues to apply to source code. Product names and service marks mentioned in documentation belong to their respective owners and are not endorsements.
+To the extent copyright or related rights exist in these assets, the maintainers make them available under [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/). For the three reference-based avatars marked with `*`, this grant applies only to rights held by the project maintainers and does not replace any permission required for the source references. Attribution may use “GuanDan Lab contributors”. The Apache-2.0 license continues to apply to source code. Product names and service marks mentioned in documentation belong to their respective owners and are not endorsements.
 
 Playing-card suit glyphs are Unicode characters rendered by the user’s system font; they are not bundled image assets.

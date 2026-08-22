@@ -1251,7 +1251,7 @@ function Home({
                 onClick={() => setView("puzzle")}
                 className="pixel-button secondary"
               >
-                5 MIN · {locale === "zh" ? "陈总局残局" : "Chen endgames"}
+                5 MIN · {locale === "zh" ? "王总局残局" : "Wang endgames"}
               </button>
             )}
             <button
@@ -1317,13 +1317,29 @@ function Mission({
           <span className="boss-badge">{m.badge}</span>
         </div>
         <div className="cast-card">
-          <Image
-            src="/characters.jpg"
-            width={768}
-            height={512}
-            alt={m.castAlt}
-            priority
-          />
+          <div className="cast-avatars" role="img" aria-label={m.castAlt}>
+            <Image
+              src="/avatar-wang-v3.png"
+              width={192}
+              height={192}
+              alt=""
+              priority
+            />
+            <Image
+              src="/avatar-gu-v3.png"
+              width={192}
+              height={192}
+              alt=""
+              priority
+            />
+            <Image
+              src="/avatar-lin-v3.png"
+              width={192}
+              height={192}
+              alt=""
+              priority
+            />
+          </div>
           <p>
             <b>{m.castTitle}</b>
             <span>{m.castNote}</span>
@@ -1617,8 +1633,8 @@ function EndgamePuzzles({
     done = solved && index === ENDGAME_PUZZLES.length - 1,
     names =
       locale === "zh"
-        ? ["你", "陈总", "小顾", "林姐"]
-        : ["You", "Chen", "Gu", "Lin"];
+        ? ["你", "王总", "小顾", "林姐"]
+        : ["You", "Wang", "Gu", "Lin"];
   useEffect(() => {
     const id = setTimeout(() => {
       const saved = parsePuzzleProgress(localStorage.getItem("gd-endgame-v1"));
@@ -1679,8 +1695,8 @@ function EndgamePuzzles({
           <p className="eyebrow">ENDGAME BRIDGE · 5 MIN</p>
           <h1 className="text-3xl font-black sm:text-5xl">
             {locale === "zh"
-              ? "陈总局 · 迷你残局"
-              : "Chen table · mini endgames"}
+              ? "王总局 · 迷你残局"
+              : "Wang table · mini endgames"}
           </h1>
           <p className="mt-3 max-w-2xl text-sm text-slate-300">
             {locale === "zh"

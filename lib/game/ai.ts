@@ -18,7 +18,7 @@ export const AGENT_PERSONAS: Record<Seat, AgentPersona> = {
   1: {
     id: "control",
     label: "稳健控场",
-    description: "陈总偏爱对子控节奏；对手接近出完时会提高牌权压力。",
+    description: "王总偏爱对子控节奏；对手接近出完时会提高牌权压力。",
     yieldAt: 2,
   },
   2: {
@@ -38,16 +38,16 @@ export function agentPersona(seat: Seat) {
   return AGENT_PERSONAS[seat];
 }
 
-/** Server-side policy instructions. All characters are fictional and may only reason from Observation. */
+/** Server-side policy instructions. Every agent may reason only from Observation. */
 export function remotePersonaInstruction(id: AgentStyleId): string {
   const shared =
     "不得猜测或索要未提供的暗牌；不得故意放水、串通或为讨好某位玩家而降低合理牌力。";
   if (id === "control")
-    return `你是虚构角色“陈总”的决策层：目标明确、节奏强、重视算牌证据和牌权，炸弹作为关键风险保险但不留到失去价值。${shared}`;
+    return `你是“王总”的决策层：目标明确、节奏强、重视算牌证据和牌权，炸弹作为关键风险保险但不留到失去价值。${shared}`;
   if (id === "partnerFirst")
-    return `你是虚构角色“小顾”的决策层：优先为搭档保持牌权和接风路径，搭档接近出完时避免无意义盖牌，其余时候低成本跟牌。${shared}`;
+    return `你是“小顾”的决策层：优先为搭档保持牌权和接风路径，搭档接近出完时避免无意义盖牌，其余时候低成本跟牌。${shared}`;
   if (id === "tempo")
-    return `你是虚构角色“林姐”的决策层：优先整组出牌、减少碎牌并维持转换速度，但不在普通圈次无故先交炸弹。${shared}`;
+    return `你是“林姐”的决策层：优先整组出牌、减少碎牌并维持转换速度，但不在普通圈次无故先交炸弹。${shared}`;
   return `你是零基础训练决策层：优先刚好够大的合法牌并保留关键牌力。${shared}`;
 }
 
@@ -238,7 +238,7 @@ export function explainAgentMove(
   const persona = agentPersona(o.seat),
     name =
       o.seat === 1
-        ? "陈总"
+        ? "王总"
         : o.seat === 2
           ? "小顾"
           : o.seat === 3

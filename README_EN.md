@@ -15,7 +15,7 @@
 
 GuanDan Lab is an open-source, beginner-first coach for Guan Dan, a Chinese four-player partnership card game played with two decks. It combines a deterministic rules engine, fair-play AI partners, a nominal 15-minute crash-course format, card-counting drills, optional voice coaching and evidence-based match replays.
 
-The default story puts you at a table with the fictional “Chen”, but this is not a deliberate-losing simulator. The coach rewards legal play, pace, partnership awareness and respectful table behaviour. It never rewards collusion, hidden-card signals or throwing a game.
+The default story puts you at a table with “Wang”, but this is not a deliberate-losing simulator. The coach rewards legal play, pace, partnership awareness and respectful table behaviour. It never rewards collusion, hidden-card signals or throwing a game.
 
 ![Real GuanDan Lab walkthrough: training paths, course, memory drill and AI table](./public/walkthrough.gif)
 
@@ -40,7 +40,7 @@ GuanDan Lab turns those gaps into one verifiable training loop:
 - A deterministic, zero-I/O rules core for two uniquely tracked 54-card decks.
 - Competition-profile hand parsing, comparison, turn flow, partnership finish order, level advancement, tribute and return.
 - 32 competition-rule conformance checks: 30 table-driven fixtures, one response-right scenario and one provenance check.
-- Three testably distinct local AI players—Chen controls, Gu supports the partner, and Lin sheds efficiently—using only seat-visible information and validated legal action IDs.
+- Three testably distinct local AI players—Wang controls, Gu supports the partner, and Lin sheds efficiently—using only seat-visible information and validated legal action IDs.
 - An optional OpenAI-compatible server-side Agent for moves and post-match public-event coaching; every returned move is validated locally before play.
 - Optional ElevenLabs Chinese coaching with captions and automatic device-speech fallback.
 - Chinese and English onboarding, mastery course and rulebook with a persisted keyboard-accessible language switch.
@@ -153,6 +153,6 @@ Roadmap items are not shipped features. The authoritative status and acceptance 
 
 ## Ethics and licence
 
-“Networking through Guan Dan” is a product story, not a promise about investors or career outcomes. “Chen” is fictional and does not represent a real executive or public figure. The project does not reward deliberate losing, peeking, signalling or collusion.
+“Networking through Guan Dan” is a product story, not a promise about investors or career outcomes. The project does not reward deliberate losing, peeking, signalling or collusion.
 
 Code is licensed under [Apache License 2.0](./LICENSE). Original AI-generated campaign artwork is documented in [the asset register](./docs/ASSETS.md).

@@ -19,8 +19,8 @@ describe('beginner coaching explanations',()=>{
 
   it('names the winning team, upgrade owner, and learner outcome',()=>{
     expect(resultSummary(finished([0,2,1,3]))).toBe('你 / 小顾队 · 双上 · 升 3 级 · 你方升级');
-    expect(resultSummary(finished([3,0,2,1]))).toBe('陈总 / 林姐队 · 头游末游 · 升 1 级 · 你方本副未升级');
-    expect(resultSummary(finished([1,0,3,2],1))).toBe('陈总 / 林姐队 · 过 A · 你方本场告负');
+    expect(resultSummary(finished([3,0,2,1]))).toBe('王总 / 林姐队 · 头游末游 · 升 1 级 · 你方本副未升级');
+    expect(resultSummary(finished([1,0,3,2],1))).toBe('王总 / 林姐队 · 过 A · 你方本场告负');
     expect(finishedCoach(finished([0,2,1,3]))).toContain('你 / 小顾队 · 双上');
   });
 

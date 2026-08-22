@@ -4,6 +4,12 @@ All notable changes will be documented here.
 
 ## Unreleased
 
+## 0.3.0-beta.19 — 2026-08-22
+
+- Renamed the table host from Chen to Wang across the course, complete matches, replays, Agent prompts and project copy without adding an artificial character disclaimer to the interface.
+- Replaced the stretched sprite-sheet portraits with three individually generated square pixel-art avatars based on user-supplied appearance references.
+- Reused the same portrait set on the home mission card and AI table, with centered cover cropping at desktop and mobile sizes.
+
 ## 0.3.0-beta.18 — 2026-08-22
 
 - Restored an always-available direct AI match entry on the home screen while keeping the 15-minute beginner course as the recommended path.
@@ -63,7 +69,7 @@ All notable changes will be documented here.
 
 ## 0.3.0-beta.10 — 2026-08-22
 
-- Added three distinct, deterministic AI character styles: Chen controls with structure, Gu yields earlier to a nearly-out partner, and Lin prioritizes efficient multi-card shedding.
+- Added three distinct, deterministic AI character styles: Wang controls with structure, Gu yields earlier to a nearly-out partner, and Lin prioritizes efficient multi-card shedding.
 - Passed the same bounded persona IDs to compatible model Agents while retaining exact local legal-move validation and deterministic fallback.
 - Exposed each character's style at the table, in live history and in replay context, with accessible descriptions and turn-by-turn coach explanations.
 - Made character descriptions tappable, clarified public-card history ordering and hand types, and kept compatible-model explanations neutral unless the local policy can prove the stated reason.
@@ -80,7 +86,7 @@ All notable changes will be documented here.
 
 ## 0.3.0-beta.8 — 2026-08-22
 
-- Added five optional deterministic 5–7 card “Chen table” endgames as a bridge from course mastery to the full 108-card deal, with immediate rules and table-manner feedback.
+- Added five optional deterministic 5–7 card “Wang table” endgames as a bridge from course mastery to the full 108-card deal, with immediate rules and table-manner feedback.
 - Validated every puzzle choice through the production rules engine and kept all opponent hands out of learner-facing fixtures and explanations.
 - Added versioned on-device puzzle progress, first-choice scoring, retry guidance and a full restart action.
 
@@ -120,7 +126,7 @@ All notable changes will be documented here.
 
 ## 0.3.0-beta.2 — 2026-08-22
 
-- Replaced the skippable crash course with 14 mastery-gated decisions covering card types, legal turns, table etiquette with 陈总 and event-based card counting.
+- Replaced the skippable crash course with 14 mastery-gated decisions covering card types, legal turns, table etiquette with 王总 and event-based card counting.
 - Added versioned, fail-closed course progress persistence and protected AI/online play from untrained entry paths.
 - Improved mobile lesson navigation and safe-area spacing.
 - Added route-level ElevenLabs provider tests for opt-in, successful audio and browser fallback behavior.
@@ -141,6 +147,6 @@ All notable changes will be documented here.
 - Renamed the open-source project to GuanDan Lab / 掼蛋实验室.
 - Added optional ElevenLabs speech with device-voice fallback.
 - Added an OpenAI-compatible agent adapter with deterministic move validation.
-- Made the training boss the fictional “陈总”.
+- Made “王总” the training-table host.
 - Added dynamic turn coaching and one-click legal hints.
 - Added Docker and open-source community foundations.
