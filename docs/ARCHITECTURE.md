@@ -2,7 +2,7 @@
 
 ## Current training mode
 
-The browser owns a deterministic `GameState`; `lib/game` validates every action and emits an event log. AI agents receive only their own hand, public card counts and public events through `observe()`. This is appropriate for offline training, but browser devtools can still inspect the full state and seed.
+The browser owns a deterministic `GameState`; `lib/game` validates every action and emits an event log. AI agents receive only their own hand, public card counts, public events and a fixed non-secret persona ID through `observe()`. Chen's control style, Gu's partner-first style and Lin's tempo style use distinct deterministic move ordering; compatible providers receive the same bounded persona ID, and every chosen card set still passes the shared legal-move boundary. This is appropriate for offline training, but browser devtools can still inspect the full state and seed.
 
 ## Trust boundary
 

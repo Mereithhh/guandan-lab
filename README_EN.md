@@ -19,7 +19,7 @@ The default story puts you at a table with the fictional “Chen”, but this is
 
 ![Real GuanDan Lab walkthrough: training paths, course, memory drill and AI table](./public/walkthrough.gif)
 
-[Deterministic core + 32 conformance checks](./tests/unit/conformance.test.ts) · [Fair-AI visibility boundary](./docs/ARCHITECTURE.md) · 119 unit/contract tests · [beta.5 security review](./docs/SECURITY_REVIEW_BETA5.md)
+[Deterministic core + 32 conformance checks](./tests/unit/conformance.test.ts) · [Fair-AI visibility boundary](./docs/ARCHITECTURE.md) · 127 unit/contract tests · [beta.5 security review](./docs/SECURITY_REVIEW_BETA5.md)
 
 ## Why this project exists
 
@@ -40,7 +40,7 @@ GuanDan Lab turns those gaps into one verifiable training loop:
 - A deterministic, zero-I/O rules core for two uniquely tracked 54-card decks.
 - Competition-profile hand parsing, comparison, turn flow, partnership finish order, level advancement, tribute and return.
 - 32 competition-rule conformance checks: 30 table-driven fixtures, one response-right scenario and one provenance check.
-- Three local AI players that receive only seat-visible information and validated legal action IDs.
+- Three testably distinct local AI players—Chen controls, Gu supports the partner, and Lin sheds efficiently—using only seat-visible information and validated legal action IDs.
 - An optional OpenAI-compatible server-side Agent for moves and post-match public-event coaching; every returned move is validated locally before play.
 - Optional ElevenLabs Chinese coaching with captions and automatic device-speech fallback.
 - Chinese and English onboarding, mastery course and rulebook with a persisted keyboard-accessible language switch.
@@ -136,7 +136,7 @@ Looking for a bounded first contribution? Pick an open [`good first issue`](http
 
 ## Roadmap and scope
 
-- `0.4`: short endgame puzzles, mid-deal feedback, character-specific Agents and AI takeover after disconnects.
+- `0.4`: mid-deal feedback and AI takeover after disconnects.
 - `0.5`: reporting, spectators, a stable room protocol and multi-instance coordination.
 - `1.0`: rule-variant plugins, Agent tournaments, a stable protocol and a reusable rules SDK.
 

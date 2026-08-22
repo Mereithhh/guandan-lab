@@ -8,7 +8,7 @@ Roadmap items are proposals until their acceptance checks pass. We do not advert
 - Add 5–7 card mini endgames so the first complete feedback loop is under five minutes.
 - Make every coach recommendation derive from a legal move and explain one reason.
 - Train memory from the previous real trick instead of revealing fixed vocabulary tiles.
-- Give the three agents distinguishable, testable styles.
+- [x] Give the three agents distinguishable, testable styles: Chen controls, Gu supports the partner, and Lin sheds efficiently.
 
 ## 0.4 — Accounts and durable progress
 

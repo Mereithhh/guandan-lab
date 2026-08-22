@@ -1,12 +1,22 @@
 import { beats, parseCombo } from './rules';
 import type { Card, GameState, Rank, Seat } from './types';
 
-export interface Observation {seat:Seat;role:GameState['players'][number]['role'];hand:Card[];level:Rank;turn:Seat;lastPlay:GameState['lastPlay'];counts:number[];events:GameState['events']}
+export type AgentStyleId='learner'|'control'|'partnerFirst'|'tempo';
+export interface AgentPersona {id:AgentStyleId;label:string;description:string;yieldAt:number}
+export const AGENT_PERSONAS:Record<Seat,AgentPersona>={
+  0:{id:'learner',label:'训练建议',description:'优先使用刚好够大的合法牌，保留炸弹。',yieldAt:3},
+  1:{id:'control',label:'稳健控场',description:'陈总偏爱对子控节奏；对手接近出完时会提高牌权压力。',yieldAt:2},
+  2:{id:'partnerFirst',label:'搭档优先',description:'小顾会在搭档只剩 4 张以内时主动让路，平时尽量低成本跟牌。',yieldAt:4},
+  3:{id:'tempo',label:'效率突围',description:'林姐优先一次带走更多张数，但不会无故先交炸弹。',yieldAt:1},
+};
+export function agentPersona(seat:Seat){return AGENT_PERSONAS[seat]}
+
+export interface Observation {seat:Seat;role:GameState['players'][number]['role'];persona:AgentStyleId;hand:Card[];level:Rank;turn:Seat;lastPlay:GameState['lastPlay'];counts:number[];events:GameState['events']}
 export interface AgentPolicy {name:string;choose(observation:Observation,legalMoves:string[][]):Promise<string[]|null>}
 
 export function observe(state:GameState,seat:Seat):Observation{
   const events=state.events.filter(e=>e.type!=='deal').map(e=>({...e,note:e.type==='round'?e.note:undefined}));
-  return{seat,role:state.players[seat].role,hand:state.players[seat].hand,level:state.level,turn:state.turn,lastPlay:state.lastPlay,counts:state.players.map(p=>p.hand.length),events};
+  return{seat,role:state.players[seat].role,persona:agentPersona(seat).id,hand:state.players[seat].hand,level:state.level,turn:state.turn,lastPlay:state.lastPlay,counts:state.players.map(p=>p.hand.length),events};
 }
 
 export function legalMoves(o:Observation):string[][]{
@@ -26,12 +36,15 @@ export function legalMoves(o:Observation):string[][]{
 
 export function chooseAiMove(o:Observation):string[]|null{
   const moves=legalMoves(o);if(!moves.length)return null;
-  const partner=((o.seat+2)%4) as Seat;if(o.lastPlay?.seat===partner&&o.counts[partner]<=3)return null;
-  return moves.sort((a,b)=>{const ca=parseCombo(a.map(id=>o.hand.find(c=>c.id===id)!),o.level)!,cb=parseCombo(b.map(id=>o.hand.find(c=>c.id===id)!),o.level)!;const bombA=['bomb','straightFlush','jokerBomb'].includes(ca.kind)?1:0,bombB=['bomb','straightFlush','jokerBomb'].includes(cb.kind)?1:0;return bombA-bombB||ca.mainRank-cb.mainRank||b.length-a.length})[0];
+  const partner=((o.seat+2)%4) as Seat,persona=agentPersona(o.seat);if(o.lastPlay?.seat===partner&&o.counts[partner]<=persona.yieldAt)return null;
+  const facts=(move:string[])=>{const combo=parseCombo(move.map(id=>o.hand.find(c=>c.id===id)!),o.level)!;return{combo,bomb:['bomb','straightFlush','jokerBomb'].includes(combo.kind)?1:0}};
+  return moves.sort((a,b)=>{const A=facts(a),B=facts(b);if(persona.id==='control'){const opponentThreat=o.counts.some((count,seat)=>seat%2!==o.seat%2&&count<=2);return A.bomb-B.bomb||(opponentThreat?B.combo.mainRank-A.combo.mainRank:Math.abs(a.length-2)-Math.abs(b.length-2))||A.combo.mainRank-B.combo.mainRank||b.length-a.length}if(persona.id==='tempo')return A.bomb-B.bomb||b.length-a.length||A.combo.mainRank-B.combo.mainRank;return A.bomb-B.bomb||A.combo.mainRank-B.combo.mainRank||b.length-a.length})[0];
 }
 
+export function explainAgentMove(o:Observation,move:string[]|null,personaVerified=true){const persona=agentPersona(o.seat),name=o.seat===1?'陈总':o.seat===2?'小顾':o.seat===3?'林姐':'你',moves=legalMoves(o);if(!move){const partner=((o.seat+2)%4) as Seat;if(!moves.length)return`${name}没有同型更大的合法牌，选择过牌。`;if(!personaVerified)return`${name}本轮选择合法过牌；本地规则已校验。`;if(o.lastPlay?.seat===partner&&o.counts[partner]<=persona.yieldAt)return`${name}采用“${persona.label}”：搭档只剩 ${o.counts[partner]} 张、接近出完，因此让出牌权。`;return`${name}采用“${persona.label}”：保留当前牌力，选择过牌。`}const combo=parseCombo(move.map(id=>o.hand.find(card=>card.id===id)!),o.level);if(!personaVerified)return`${name}本轮选择合法出 ${move.length} 张牌；本地规则已校验。`;if(combo&&['bomb','straightFlush','jokerBomb'].includes(combo.kind))return`${name}采用“${persona.label}”：此时用炸弹争夺牌权。`;if(persona.id==='control')return`${name}采用“稳健控场”：用受控牌力维持牌权压力。`;if(persona.id==='tempo')return`${name}采用“效率突围”：这一手打出 ${move.length} 张牌。`;if(persona.id==='partnerFirst')return`${name}采用“搭档优先”：以较低成本行动并观察搭档。`;return`${name}采用“训练建议”：优先使用刚好够大的合法牌。`}
+
 export async function safeAgentMove(policy:AgentPolicy,o:Observation,timeoutMs=1500):Promise<string[]|null>{
-  const legal=legalMoves(o),fallback=chooseAiMove(o);try{const move=await Promise.race([policy.choose(o,legal),new Promise<null>(resolve=>setTimeout(()=>resolve(null),timeoutMs))]);if(move===null)return o.lastPlay?null:fallback;const key=[...move].sort().join('|');return legal.some(m=>[...m].sort().join('|')===key)?move:fallback}catch{return fallback}
+  const legal=legalMoves(o),fallback=chooseAiMove(o);let timer:ReturnType<typeof setTimeout>|undefined;try{const move=await Promise.race([policy.choose(o,legal),new Promise<never>((_resolve,reject)=>{timer=setTimeout(()=>reject(new Error('agent timeout')),timeoutMs)})]);if(move===null)return o.lastPlay?null:fallback;const key=[...move].sort().join('|');return legal.some(m=>[...m].sort().join('|')===key)?move:fallback}catch{return fallback}finally{if(timer)clearTimeout(timer)}
 }
 
 export const localTrainingAgent:AgentPolicy={name:'搭档协作 Agent v1',choose:async(o)=>chooseAiMove(o)};
