@@ -67,7 +67,7 @@ Caddy obtains and renews certificates automatically. With Nginx, overwrite and f
 
 - Google OAuth callback: `https://guandan.mereith.com/api/auth/google/callback`
 - Compatible model provider: `AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL`, `PAID_PROVIDERS_ENABLED=1`
-- ElevenLabs: `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`
+- ElevenLabs: `ELEVENLABS_API_KEY` and fallback `ELEVENLABS_VOICE_ID`. Set `ELEVENLABS_VOICE_ID_WANG`, `ELEVENLABS_VOICE_ID_GU` and `ELEVENLABS_VOICE_ID_LIN` for distinct character voices. The client sends the active Chinese/English locale; `eleven_flash_v2_5` is the default, with optional `ELEVENLABS_MODEL_ID_ZH` / `ELEVENLABS_MODEL_ID_EN` overrides.
 - Voluntary support QR: set `SUPPORT_URL` to a public sponsorship or payment page
 
 Enabling either paid provider also requires `PAID_PROVIDER_USER_DAILY_UNITS` and `PAID_PROVIDER_GLOBAL_DAILY_UNITS`, with the deployment limit at least as large as the user limit. Optional operation costs, circuit thresholds and concurrency controls are documented in `.env.example`. Units are operator-defined relative costs, not currency or token counts. SQLite atomically persists the UTC-day ledgers; deleting a user does not refund deployment usage, and a Google claim merges the guest's personal usage.

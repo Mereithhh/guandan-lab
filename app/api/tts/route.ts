@@ -1,4 +1,4 @@
-import { elevenLabsSpeechUrl, normalizeVoiceText } from '@/lib/services/tts';
+import { elevenLabsModelId, elevenLabsSpeechUrl, elevenLabsVoiceId, normalizeTtsLocale, normalizeTtsSpeaker, normalizeVoiceText, resolveVoiceLocale } from '@/lib/services/tts';
 import { BodyTooLargeError, consumeRateLimit, isSameOrigin, readJsonBody, readResponseBytes,requestClientKey } from '@/lib/services/http-guard';
 import { acquireProviderLease,authorizePaidProvider, cancelProviderLease,chargePaidProvider,recordProviderResult } from '@/lib/services/provider-guard';
 
@@ -6,7 +6,7 @@ export const runtime = 'nodejs';
 const audioCache = new Map<string, ArrayBuffer>();
 const audioInflight = new Map<string, Promise<ArrayBuffer>>();
 export function resetTtsCachesForTests(){audioCache.clear();audioInflight.clear()}
-async function audioCacheKey(voiceId:string,model:string,text:string){const bytes=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(`${voiceId}\0${model}\0${text}`)));return [...bytes].map(value=>value.toString(16).padStart(2,'0')).join('')}
+async function audioCacheKey(voiceId:string,model:string,locale:string,text:string){const bytes=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(`${voiceId}\0${model}\0${locale}\0${text}`)));return [...bytes].map(value=>value.toString(16).padStart(2,'0')).join('')}
 const audioResponse=(audio:ArrayBuffer)=>new Response(audio.slice(0),{headers:{'content-type':'audio/mpeg','cache-control':'private, max-age=3600'}});
 
 export async function POST(request: Request) {
@@ -16,14 +16,15 @@ export async function POST(request: Request) {
   try { body = await readJsonBody(request,4096); } catch(error) { return Response.json({ error: error instanceof BodyTooLargeError?'请求过大':'请求格式无效' }, { status: error instanceof BodyTooLargeError?413:400 }); }
   const text = normalizeVoiceText((body as {text?: unknown})?.text);
   if (!text) return Response.json({ error: '缺少可朗读文本' }, { status: 400 });
+  const locale=resolveVoiceLocale(text,normalizeTtsLocale((body as {locale?:unknown}).locale)),speaker=normalizeTtsSpeaker((body as {speaker?:unknown}).speaker);
 
   const apiKey = process.env.ELEVENLABS_API_KEY;
-  const voiceId = process.env.ELEVENLABS_VOICE_ID;
+  const voiceId = elevenLabsVoiceId(process.env,speaker);
   if (!apiKey || !voiceId) return Response.json({ error: 'ElevenLabs 尚未配置', fallback: 'browser' }, { status: 503 });
-  const model = process.env.ELEVENLABS_MODEL_ID || 'eleven_multilingual_v2';
+  const model = elevenLabsModelId(process.env,locale);
   const authorization=await authorizePaidProvider(request,'tts');if(authorization.response)return authorization.response;
   if(!consumeRateLimit(requestClientKey(request,`tts:${authorization.context!.claims.userId}`,process.env.TRUST_PROXY==='1'),30,60_000))return Response.json({error:'语音请求过于频繁',fallback:'browser'},{status:429});
-  const cacheKey=await audioCacheKey(voiceId,model,text);
+  const cacheKey=await audioCacheKey(voiceId,model,locale,text);
   const cached = audioCache.get(cacheKey);
   if (cached) return audioResponse(cached);
   const existing=audioInflight.get(cacheKey);if(existing){try{return audioResponse(await existing)}catch{return Response.json({error:'语音服务暂时不可用',fallback:'browser'},{status:502})}}
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
       method: 'POST', signal:controller.signal,
       redirect: 'error',
       headers: { 'xi-api-key': apiKey, 'content-type': 'application/json', accept: 'audio/mpeg' },
-      body: JSON.stringify({ text, model_id: model, output_format: 'mp3_44100_128' }),
+      body: JSON.stringify({ text, model_id: model, language_code:locale, output_format: 'mp3_44100_128' }),
     });
     const contentType=response.headers.get('content-type')||'';
     if (!response.ok || !contentType.startsWith('audio/')) throw new Error('invalid voice response');

@@ -1,12 +1,14 @@
 "use client";
 
 import {
+  useCallback,
   useEffect,
   useRef,
   useState,
   type Dispatch,
   type SetStateAction,
 } from "react";
+import { ttsSpeakerForSeat, type TtsSpeaker } from "@/lib/services/tts";
 import Image from "next/image";
 import { QRCodeSVG } from "qrcode.react";
 import { analyzeStyle } from "@/lib/game/analysis";
@@ -159,6 +161,14 @@ export default function GuandanApp({ supportUrl }: { supportUrl: string }) {
   const copy = onboardingCopy[locale];
   const [selected, setSelected] = useState<string[]>([]);
   const [coach, setCoach] = useState("提示已开启：系统会解释每一次出牌。");
+  const [voiceSpeaker, setVoiceSpeaker] = useState<TtsSpeaker>("coach");
+  const updateCoach = useCallback(
+    (message: string, speaker: TtsSpeaker = "coach") => {
+      setVoiceSpeaker(speaker);
+      setCoach(message);
+    },
+    [],
+  );
   const [history, setHistory] = useState<GameState[]>([]);
   const [matchReview, setMatchReview] = useState<MatchReviewState | null>(null);
   const [speedIndex, setSpeedIndex] = useState(1);
@@ -520,10 +530,11 @@ export default function GuandanApp({ supportUrl }: { supportUrl: string }) {
     const remote = agentModeEnabled && account.agentProvider === "compatible",
       applyAiState = (next: GameState, reason: string) => {
         setGame(next);
-        if (next.phase === "finished") setCoach(finishedCoach(next));
+        if (next.phase === "finished") updateCoach(finishedCoach(next));
         else if (next.turn === 0)
-          setCoach(
+          updateCoach(
             `${reason} ${next.lastPlay ? `现在轮到你跟${comboName(next.lastPlay.combo)}，可用更大的同型牌、合适的炸弹或过牌。` : "现在轮到你领出，先用“一键提示”查看合法牌。"}`,
+            ttsSpeakerForSeat(game.turn),
           );
       };
     const id = setTimeout(async () => {
@@ -566,7 +577,7 @@ export default function GuandanApp({ supportUrl }: { supportUrl: string }) {
             explainAgentMove(observation, move, true),
           );
         } catch {
-          setCoach("AI 动作校验失败，已安全暂停。请开始新比赛。");
+          updateCoach("AI 动作校验失败，已安全暂停。请开始新比赛。");
         }
       }
     }, aiSpeed.delay);
@@ -574,7 +585,7 @@ export default function GuandanApp({ supportUrl }: { supportUrl: string }) {
       cancelled = true;
       clearTimeout(id);
     };
-  }, [account.agentProvider, agentModeEnabled, aiSpeed.delay, game, view]);
+  }, [account.agentProvider, agentModeEnabled, aiSpeed.delay, game, updateCoach, view]);
   useEffect(() => {
     if (view !== "game" || !voiceEnabled) return;
     let active = true,
@@ -585,15 +596,30 @@ export default function GuandanApp({ supportUrl }: { supportUrl: string }) {
         if (!active || !("speechSynthesis" in window)) return;
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(coach);
-        utterance.lang = "zh-CN";
+        const hanCount = (coach.match(/[\p{Script=Han}]/gu) || []).length,
+          latinCount = (coach.match(/[A-Za-z]/gu) || []).length,
+          speechLocale =
+            hanCount === latinCount
+              ? locale
+              : hanCount > latinCount
+                ? "zh"
+                : "en";
+        utterance.lang = speechLocale === "zh" ? "zh-CN" : "en-US";
         utterance.rate = 0.92;
+        const voices = window.speechSynthesis
+            .getVoices()
+            .filter((voice) =>
+              voice.lang.toLowerCase().startsWith(speechLocale),
+            ),
+          voiceIndex = { coach: 0, wang: 1, gu: 2, lin: 3 }[voiceSpeaker];
+        if (voices.length) utterance.voice = voices[voiceIndex % voices.length];
         window.speechSynthesis.speak(utterance);
       };
     void fetch("/api/tts", {
       method: "POST",
       signal: controller.signal,
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ text: coach }),
+      body: JSON.stringify({ text: coach, locale, speaker: voiceSpeaker }),
     })
       .then((response) => {
         if (!response.ok) throw new Error("fallback");
@@ -615,7 +641,7 @@ export default function GuandanApp({ supportUrl }: { supportUrl: string }) {
       if (url) URL.revokeObjectURL(url);
       window.speechSynthesis?.cancel();
     };
-  }, [coach, view, voiceEnabled]);
+  }, [coach, locale, view, voiceEnabled, voiceSpeaker]);
   useEffect(() => {
     if (game.phase !== "finished" || account.agentProvider !== "compatible")
       return;
@@ -740,7 +766,7 @@ export default function GuandanApp({ supportUrl }: { supportUrl: string }) {
     setLocalSaveStatus("idle");
     setSyncStatus("idle");
     setSelected([]);
-    setCoach(
+    updateCoach(
       next.turn === 0
         ? "轮到你领出：建议先用“一键提示”看看一组合法牌。"
         : `${next.players[next.turn].name}先出，先观察牌型和桌面节奏。`,
@@ -752,12 +778,12 @@ export default function GuandanApp({ supportUrl }: { supportUrl: string }) {
     setLocalSaveStatus("idle");
     setSyncStatus("idle");
     setSelected([]);
-    setCoach("新一副已完成贡还牌。注意谁获得了首出权。");
+    updateCoach("新一副已完成贡还牌。注意谁获得了首出权。");
   };
   const onPlay = () => {
     const valid = legalPlay(game, 0, selected);
     if (!valid.ok) {
-      setCoach(`不能这样出：${valid.reason}`);
+      updateCoach(`不能这样出：${valid.reason}`);
       return;
     }
     const cards = game.players[0].hand.filter((c) => selected.includes(c.id)),
@@ -765,7 +791,7 @@ export default function GuandanApp({ supportUrl }: { supportUrl: string }) {
       next = playCards(game, 0, selected);
     setGame(next);
     setSelected([]);
-    setCoach(
+    updateCoach(
       next.phase === "finished"
         ? finishedCoach(next)
         : `这手是${comboName(combo)}。${combo.kind.includes("bomb") ? "炸弹已记录：确认它值得换取这一圈控制权。" : "出牌有效，继续观察搭档剩余张数。"}`,
@@ -773,7 +799,7 @@ export default function GuandanApp({ supportUrl }: { supportUrl: string }) {
   };
   const showHint = () => {
     if (game.turn !== 0) {
-      setCoach(
+      updateCoach(
         `现在是${game.players[game.turn].name}的回合，先看清对方出的牌型。`,
       );
       return;
@@ -783,7 +809,7 @@ export default function GuandanApp({ supportUrl }: { supportUrl: string }) {
       move = chooseAiMove(observation);
     if (!move) {
       setSelected([]);
-      setCoach(
+      updateCoach(
         options.length
           ? "你有牌能压，但搭档只剩 3 张以内，建议过牌让搭档保持牌权。"
           : "当前确实没有合法压牌，建议过牌；这不是认输，是保留实力。",
@@ -793,7 +819,7 @@ export default function GuandanApp({ supportUrl }: { supportUrl: string }) {
     setSelected(move);
     const cards = game.players[0].hand.filter((c) => move.includes(c.id)),
       combo = parseCombo(cards, game.level)!;
-    setCoach(explainHintSelection(cards, combo));
+    updateCoach(explainHintSelection(cards, combo));
   };
   if (!trainingSyncReady)
     return (
@@ -866,9 +892,9 @@ export default function GuandanApp({ supportUrl }: { supportUrl: string }) {
             onPass={() => {
               try {
                 setGame(passTurn(game, 0));
-                setCoach("已过牌。观察这一圈由谁取得出牌权。");
+                updateCoach("已过牌。观察这一圈由谁取得出牌权。");
               } catch (e) {
-                setCoach((e as Error).message);
+                updateCoach((e as Error).message);
               }
             }}
             onHint={showHint}

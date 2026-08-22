@@ -4,6 +4,12 @@ All notable changes will be documented here.
 
 ## Unreleased
 
+## 0.3.0-beta.23 — 2026-08-22
+
+- Made ElevenLabs and browser speech follow the actual Chinese/English coaching text, with the active UI locale as a safe fallback.
+- Added separate server-side voice selection for Wang, Gu and Lin while retaining the existing fallback voice configuration.
+- Switched the interactive TTS default to `eleven_flash_v2_5`, which accepts explicit language codes, and documented per-character/per-language overrides.
+
 ## 0.3.0-beta.22 — 2026-08-22
 
 - Renamed the direct live-lobby entry to “在线匹配” / “Match online” so it no longer suggests a foundation-course gate.
