@@ -9,9 +9,9 @@
 [![License](https://img.shields.io/github/license/Mereithhh/guandan-lab)](./LICENSE)
 [![Try the public demo](https://img.shields.io/badge/demo-play_now-57e3bd)](https://guandan-bootcamp.miromind-0889.chatgpt.site)
 
-[▶ Try the demo](https://guandan-bootcamp.miromind-0889.chatgpt.site) · [☆ Star the repo](https://github.com/Mereithhh/guandan-lab) · [⌘ Run locally](#quick-start)
+[▶ Try the demo](https://guandan-bootcamp.miromind-0889.chatgpt.site) · [☆ Star the repo](https://github.com/Mereithhh/guandan-lab) · [◇ Join the discussion](https://github.com/Mereithhh/guandan-lab/discussions/35) · [⌘ Run locally](#quick-start)
 
-[Public demo](https://guandan-bootcamp.miromind-0889.chatgpt.site) · [Deployment](./docs/DEPLOYMENT_EN.md) · [Roadmap](./ROADMAP.md) · [Architecture](./docs/ARCHITECTURE.md) · [Contributing](./CONTRIBUTING.md)
+[Public demo](https://guandan-bootcamp.miromind-0889.chatgpt.site) · [Launch discussion](https://github.com/Mereithhh/guandan-lab/discussions/35) · [Production checklist](https://github.com/Mereithhh/guandan-lab/issues/34) · [Deployment](./docs/DEPLOYMENT_EN.md) · [Roadmap](./ROADMAP.md) · [Architecture](./docs/ARCHITECTURE.md) · [Contributing](./CONTRIBUTING.md)
 
 GuanDan Lab is an open-source, beginner-first coach for Guan Dan, a Chinese four-player partnership card game played with two decks. It combines a deterministic rules engine, fair-play AI partners, a nominal 15-minute crash-course format, card-counting drills, optional voice coaching and evidence-based match replays.
 
@@ -19,7 +19,7 @@ The default story puts you at a table with the fictional “Chen”, but this is
 
 ![Real GuanDan Lab walkthrough: training paths, course, memory drill and AI table](./public/walkthrough.gif)
 
-[Deterministic core + 32 conformance checks](./tests/unit/conformance.test.ts) · [Fair-AI visibility boundary](./docs/ARCHITECTURE.md) · 146 unit/contract tests · [beta.5 security review](./docs/SECURITY_REVIEW_BETA5.md)
+[Deterministic core + 32 conformance checks](./tests/unit/conformance.test.ts) · [Fair-AI visibility boundary](./docs/ARCHITECTURE.md) · 178 unit/contract tests · [beta.15 paid-provider security review](./docs/SECURITY_REVIEW_BETA15.md)
 
 ## Why this project exists
 
