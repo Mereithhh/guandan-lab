@@ -4,6 +4,10 @@ All notable changes will be documented here.
 
 ## Unreleased
 
+## 0.3.0-beta.3 — 2026-08-22
+
+- Added an exposed-card subtraction drill generated from real two-deck card IDs, with remedial category repetition, separate accuracy history and a preserved nine-grid mode.
+
 ## 0.3.0-beta.2 — 2026-08-22
 
 - Replaced the skippable crash course with 14 mastery-gated decisions covering card types, legal turns, table etiquette with 陈总 and event-based card counting.
