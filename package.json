@@ -1,6 +1,6 @@
 {
   "name": "guandan-lab",
-  "version": "0.3.0-beta.8",
+  "version": "0.3.0-beta.9",
   "private": true,
   "description": "Open-source Guandan coach with a deterministic rules engine, AI practice partners, memory drills, and evidence-based replays.",
   "license": "Apache-2.0",

@@ -19,7 +19,7 @@ The default story puts you at a table with the fictional “Chen”, but this is
 
 ![Real GuanDan Lab walkthrough: training paths, course, memory drill and AI table](./public/walkthrough.gif)
 
-[Deterministic core + 32 conformance checks](./tests/unit/conformance.test.ts) · [Fair-AI visibility boundary](./docs/ARCHITECTURE.md) · 108 unit/contract tests · [beta.5 security review](./docs/SECURITY_REVIEW_BETA5.md)
+[Deterministic core + 32 conformance checks](./tests/unit/conformance.test.ts) · [Fair-AI visibility boundary](./docs/ARCHITECTURE.md) · 119 unit/contract tests · [beta.5 security review](./docs/SECURITY_REVIEW_BETA5.md)
 
 ## Why this project exists
 
@@ -41,7 +41,7 @@ GuanDan Lab turns those gaps into one verifiable training loop:
 - Competition-profile hand parsing, comparison, turn flow, partnership finish order, level advancement, tribute and return.
 - 32 competition-rule conformance checks: 30 table-driven fixtures, one response-right scenario and one provenance check.
 - Three local AI players that receive only seat-visible information and validated legal action IDs.
-- An optional OpenAI-compatible server-side Agent; every returned move is validated locally before play.
+- An optional OpenAI-compatible server-side Agent for moves and post-match public-event coaching; every returned move is validated locally before play.
 - Optional ElevenLabs Chinese coaching with captions and automatic device-speech fallback.
 - Chinese and English onboarding, mastery course and rulebook with a persisted keyboard-accessible language switch.
 - Five deterministic mini endgames whose candidate actions are checked by the production rules engine, with no opponent hands exposed.
@@ -94,6 +94,8 @@ ELEVENLABS_MODEL_ID=eleven_multilingual_v2
 ```
 
 The compatible Agent endpoint fixes the request path to `/chat/completions`, rejects unsafe private base URLs by default, limits input and output sizes, enforces timeouts and returns only locally validated moves. The ElevenLabs route rejects redirects, validates the audio response, limits its size and returns an explicit browser-speech fallback on failure.
+
+Post-match model review receives only public play events, finish order and non-hidden deterministic local metrics—never any player's unplayed hand. The model may select only from controlled style and advice codes, which local code maps to reviewed copy; local code also remains authoritative for card-skill score, social score and evidence metrics. Timeout, throttling, free text or malformed output is disclosed in the result dialog and falls back to local evidence.
 
 `GET /api/session` reports the effective Agent and voice modes without returning a model name, base URL or secret.
 
