@@ -14,7 +14,7 @@ GuanDan Lab 是一个开源的零基础掼蛋训练器。它把确定性的竞�
 - 配置 ElevenLabs 后使用中文语音教练；未配置或请求失败时回退到设备语音，字幕始终存在。
 - 同点手牌叠放、可调 AI 节奏、最近出牌记录、一键合法提示。
 - 九宫格记牌、完整事件回放、牌技分与社交分分离的赛后建议。
-- 游客模式无需注册，当前训练记录只保存在本机。
+- 游客模式无需注册；浏览器始终保留最近训练记录，自托管配置 SQLite 后会同步完整事件与分析。
 
 ## 快速启动
 
@@ -33,8 +33,14 @@ npm run dev
 Docker：
 
 ```bash
+cp .env.example .env.local
+# 在 .env.local 中设置至少 24 位随机 SESSION_SECRET
 docker compose up --build
 ```
+
+默认 SQLite 数据位于 Docker 命名卷的 `/data/guandan.sqlite`。数据库启用 WAL、外键与 busy timeout，并保存游客资料、会话、完整牌局、逐手事件、分析和用量配额表。未配置 `SESSION_SECRET` 时会安全降级为纯本机存档，不会签发可伪造的生产会话。
+
+自托管数据接口支持 `GET /api/progress?export=1` 导出当前游客的数据，及 `DELETE /api/progress` 删除资料。写入和删除要求同源请求与 HttpOnly 签名会话。
 
 ## 可插拔 AI 与语音
 
@@ -81,7 +87,7 @@ npm run test:e2e
 
 - `0.2`：开源基础、陈总训练场景、兼容 AI Provider、ElevenLabs TTS、Docker。
 - `0.3`：5–7 张迷你残局、动态教练、真实事件记牌训练、角色化 Agent。
-- `0.4`：游客云存档、SQLite、自助导出/删除、Google OAuth 数据认领。
+- `0.4`：游客云存档、SQLite、自助导出/删除已进入预览；Google OAuth 数据认领仍在开发。
 - `0.5`：服务端权威在线房间、匹配、断线重连、举报与安全机制。
 - `1.0`：规则变体插件、Agent 锦标赛、稳定协议与可复用规则 SDK。
 

@@ -11,9 +11,11 @@ The browser owns a deterministic `GameState`; `lib/game` validates every action 
 - Model output is untrusted. It must match one of the legal moves computed by the rules core; otherwise the deterministic fallback is used.
 - A provider base URL is administrator configuration, not a player preference. Public HTTPS is required by default to reduce SSRF and accidental key exfiltration.
 
-## Self-host target
+## Self-host persistence
 
-The self-hosted edition will use one Node process and SQLite under `/data` for the first durable release. SQLite is a single-instance choice, not a horizontal-scaling claim. Repositories will expose guest profiles, matches, append-only match events, analyses and quotas. WAL, foreign keys, busy timeout, migrations and backups are release gates.
+The self-hosted edition uses one Node process and SQLite under `/data`. A signed, HttpOnly guest cookie is created without blocking play; completed training games are written transactionally to `matches`, `match_events` and `analyses`. The schema also reserves durable session and quota records. SQLite runs with WAL, foreign keys and a busy timeout. This is a single-instance choice, not a horizontal-scaling claim; operators must back up the mounted volume.
+
+When `SESSION_SECRET` or `DATABASE_PATH` is absent—or when the runtime has no persistent filesystem—the browser keeps the local replay store and the API reports `persistent: false`. This is the expected Cloudflare Sites fallback until a D1 adapter is configured.
 
 ## Online target
 

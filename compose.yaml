@@ -10,8 +10,15 @@ services:
         required: false
     environment:
       SITE_URL: ${SITE_URL:-http://localhost:3000}
+      DATABASE_PATH: ${DATABASE_PATH:-/data/guandan.sqlite}
+      SESSION_SECRET: ${SESSION_SECRET:-}
     read_only: true
     tmpfs:
       - /tmp:size=64m
+    volumes:
+      - guandan-data:/data
     security_opt:
       - no-new-privileges:true
+
+volumes:
+  guandan-data:
