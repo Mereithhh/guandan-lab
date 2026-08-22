@@ -9,7 +9,7 @@
 [![License](https://img.shields.io/github/license/Mereithhh/guandan-lab)](./LICENSE)
 [![Try the public demo](https://img.shields.io/badge/demo-play_now-57e3bd)](https://guandan-bootcamp.miromind-0889.chatgpt.site)
 
-[▶ Try the demo](https://guandan-bootcamp.miromind-0889.chatgpt.site) · [☆ Star the repo](https://github.com/Mereithhh/guandan-lab/stargazers) · [⌘ Run locally](#quick-start)
+[▶ Try the demo](https://guandan-bootcamp.miromind-0889.chatgpt.site) · [☆ Star the repo](https://github.com/Mereithhh/guandan-lab) · [⌘ Run locally](#quick-start)
 
 [Public demo](https://guandan-bootcamp.miromind-0889.chatgpt.site) · [Deployment](./docs/DEPLOYMENT_EN.md) · [Roadmap](./ROADMAP.md) · [Architecture](./docs/ARCHITECTURE.md) · [Contributing](./CONTRIBUTING.md)
 

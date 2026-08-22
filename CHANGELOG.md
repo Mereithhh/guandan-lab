@@ -4,6 +4,12 @@ All notable changes will be documented here.
 
 ## Unreleased
 
+## 0.3.0-beta.11 — 2026-08-22
+
+- Added a persistent mobile GitHub/Star entry so public-demo visitors can reach the open-source project without scrolling through the full home page.
+- Corrected README Star links to the repository root and removed unnecessary investor framing from public launch copy.
+- Corrected GitHub beta.9 and beta.10 release metadata to pre-release status.
+
 ## 0.3.0-beta.10 — 2026-08-22
 
 - Added three distinct, deterministic AI character styles: Chen controls with structure, Gu yields earlier to a nearly-out partner, and Lin prioritizes efficient multi-card shedding.
