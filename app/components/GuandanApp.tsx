@@ -1238,6 +1238,13 @@ function Home({
             >
               {h.start}
             </button>
+            <button
+              data-testid="direct-game"
+              onClick={() => setView("game")}
+              className="pixel-button secondary"
+            >
+              {h.directGame}
+            </button>
             {trainingComplete && (
               <button
                 data-testid="start-puzzles"
@@ -1274,11 +1281,7 @@ function Home({
             ))}
           </div>
         </div>
-        <Mission
-          setView={setView}
-          trainingComplete={trainingComplete}
-          copy={copy}
-        />
+        <Mission setView={setView} copy={copy} />
       </section>
       <section className="border-y-2 border-slate-700 bg-slate-900/60">
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px bg-slate-700 md:grid-cols-4">
@@ -1295,11 +1298,9 @@ function Home({
 }
 function Mission({
   setView,
-  trainingComplete,
   copy,
 }: {
   setView: (v: View) => void;
-  trainingComplete: boolean;
   copy: OnboardingCopy;
 }) {
   const m = copy.mission;
@@ -1345,8 +1346,8 @@ function Mission({
           <Track
             time={m.tracks[2].time}
             title={m.tracks[2].title}
-            desc={trainingComplete ? m.tracks[2].unlocked : m.tracks[2].locked}
-            onClick={() => setView(trainingComplete ? "game" : "lesson")}
+            desc={m.tracks[2].unlocked}
+            onClick={() => setView("game")}
           />
         </div>
         <p className="mt-5 border-t-2 border-dashed border-slate-300 pt-4 text-xs leading-6 text-slate-500">
