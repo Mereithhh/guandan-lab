@@ -2,7 +2,7 @@
 
 > 快速会打，体面上桌。不是教你赢老板，是教你成为大家愿意再约的搭档。
 
-[在线体验](https://guandan-bootcamp.miromind-0889.chatgpt.site) · [部署指南](./docs/DEPLOYMENT.md) · [路线图](./ROADMAP.md) · [Launch Kit](./docs/LAUNCH_KIT.md) · [隐私说明](./PRIVACY.md) · [参与贡献](./CONTRIBUTING.md)
+[在线体验](https://guandan-bootcamp.miromind-0889.chatgpt.site) · [部署指南](./docs/DEPLOYMENT.md) · [路线图](./ROADMAP.md) · [Launch Kit](./docs/LAUNCH_KIT.md) · [素材授权](./docs/ASSETS.md) · [隐私说明](./PRIVACY.md) · [参与贡献](./CONTRIBUTING.md)
 
 GuanDan Lab 是一个开源的零基础掼蛋训练器。它把确定性的竞技规则引擎、不会偷看牌的 AI 陪练、记牌训练和逐手复盘放在同一个 15 分钟学习路径里。默认场景是陪虚构角色“陈总”上桌：目标是节奏舒服、配合清楚、牌品可靠，而不是故意输牌或暗示牌情。
 

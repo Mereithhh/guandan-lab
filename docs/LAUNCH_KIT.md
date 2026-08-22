@@ -31,7 +31,7 @@ GuanDan Lab（掼蛋实验室）是一个开源的零基础掼蛋训练器：用
 
 ## English launch copy
 
-**GuanDan Lab is an open-source, beginner-first coach for Guandan, China’s fast-growing partnership card game.** It combines a deterministic rules engine, fair-play AI partners, optional voice coaching, memory drills, and evidence-based replays. The goal is not to script a win—it is to help a newcomer play confidently, cooperate clearly, and keep the table enjoyable.
+**GuanDan Lab is an open-source, beginner-first coach for Guandan, a widely played Chinese partnership card game.** It combines a deterministic rules engine, fair-play AI partners, optional voice coaching, memory drills, and evidence-based replays. The goal is not to script a win—it is to help a newcomer play confidently, cooperate clearly, and keep the table enjoyable.
 
 Tagline: **Learn fast. Play with grace.**
 
