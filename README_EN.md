@@ -19,7 +19,7 @@ The default story puts you at a table with the fictional “Chen”, but this is
 
 ![Real GuanDan Lab walkthrough: training paths, course, memory drill and AI table](./public/walkthrough.gif)
 
-[Deterministic core + 32 conformance checks](./tests/unit/conformance.test.ts) · [Fair-AI visibility boundary](./docs/ARCHITECTURE.md) · 127 unit/contract tests · [beta.5 security review](./docs/SECURITY_REVIEW_BETA5.md)
+[Deterministic core + 32 conformance checks](./tests/unit/conformance.test.ts) · [Fair-AI visibility boundary](./docs/ARCHITECTURE.md) · 146 unit/contract tests · [beta.5 security review](./docs/SECURITY_REVIEW_BETA5.md)
 
 ## Why this project exists
 
@@ -75,6 +75,8 @@ docker compose up --build
 ```
 
 The default database lives at `/data/guandan.sqlite` in a named Docker volume. If `SESSION_SECRET` is missing, the application fails closed to browser-local saves instead of issuing forgeable production sessions.
+
+Before a public Docker deployment, run `docker compose run --rm --no-deps web node scripts/doctor.mjs --lang=en`; local Node development may use `npm run doctor -- --lang=en`. It checks sessions, SQLite, HTTPS, OAuth, matching, compatible models, ElevenLabs and the support link without printing any secret; production blockers return a non-zero exit code.
 
 See [the deployment guide](./docs/DEPLOYMENT_EN.md) for TLS, reverse proxy, backup, upgrade and DNS instructions.
 

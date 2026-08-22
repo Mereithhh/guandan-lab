@@ -15,6 +15,7 @@ ENV NODE_ENV=production \
     TMPDIR=/tmp
 WORKDIR /app
 COPY --from=build --chown=node:node /app/dist/standalone ./
+COPY --from=build --chown=node:node /app/scripts/doctor.mjs ./scripts/doctor.mjs
 # Vinext's standalone tracer currently misses React's server runtime packages.
 # Keep the runtime image minimal while supplying the exact packages it imports.
 COPY --from=build --chown=node:node /app/node_modules/react ./node_modules/react

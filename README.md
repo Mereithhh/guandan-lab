@@ -17,7 +17,7 @@ GuanDan Lab 是一个开源的零基础掼蛋训练器。它先用标称 15 分�
 
 ![GuanDan Lab 真实产品演示：训练入口、课程、记牌与 AI 牌桌](./public/walkthrough.gif)
 
-[确定性核心与 32 项一致性检查](./tests/unit/conformance.test.ts) · [公平 AI 的可见信息边界](./docs/ARCHITECTURE.md) · 127 项单元/契约测试 · [beta.5 安全审查记录](./docs/SECURITY_REVIEW_BETA5.md)
+[确定性核心与 32 项一致性检查](./tests/unit/conformance.test.ts) · [公平 AI 的可见信息边界](./docs/ARCHITECTURE.md) · 146 项单元/契约测试 · [beta.5 安全审查记录](./docs/SECURITY_REVIEW_BETA5.md)
 
 ## 已经可以做什么
 
@@ -63,6 +63,8 @@ docker compose up --build
 ```
 
 默认 SQLite 数据位于 Docker 命名卷的 `/data/guandan.sqlite`。数据库启用 WAL、外键与 busy timeout，并保存游客资料、会话、完整牌局、逐手事件、分析和用量配额表。未配置 `SESSION_SECRET` 时会安全降级为纯本机存档，不会签发可伪造的生产会话。
+
+准备公开部署前运行 `docker compose run --rm --no-deps web node scripts/doctor.mjs`；本地 Node 开发也可运行 `npm run doctor`。它会检查会话、SQLite、HTTPS、OAuth、在线匹配、兼容模型、ElevenLabs 和打赏链接，只输出能力状态与修复建议，不会显示任何密钥；存在生产阻断项时以非零状态退出。
 
 公网服务器、TLS 反向代理、备份、升级与 `guandan.mereith.com` DNS 步骤见 [部署指南](./docs/DEPLOYMENT.md)。
 

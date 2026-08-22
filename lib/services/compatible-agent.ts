@@ -12,12 +12,12 @@ export function normalizeBaseUrl(value: string): string {
 export function providerChatCompletionsUrl(value: string, allowPrivate = false): string | null {
   try {
     const url = new URL(normalizeBaseUrl(value));
-    const hostname = url.hostname.toLowerCase().replace(/^\[|\]$/g,'');
+    const hostname = url.hostname.toLowerCase().replace(/^\[|\]$/g,'').replace(/\.$/,'');
     const privateHost = hostname === 'localhost' || hostname === '::' || hostname === '::1' || hostname.endsWith('.local') ||
       /^0\./.test(hostname) || /^127\./.test(hostname) || /^10\./.test(hostname) || /^192\.168\./.test(hostname) ||
       /^192\.0\.0\./.test(hostname) || /^198\.(18|19)\./.test(hostname) || /^169\.254\./.test(hostname) ||
       /^172\.(1[6-9]|2\d|3[01])\./.test(hostname) || /^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./.test(hostname) ||
-      /^(fc|fd|fe[89ab])/.test(hostname) || hostname.includes('::ffff:') || /^(22[4-9]|2[3-5]\d)\./.test(hostname);
+      (hostname.includes(':') && /^(fc|fd|fe[89ab])/.test(hostname)) || hostname.includes('::ffff:') || /^(22[4-9]|2[3-5]\d)\./.test(hostname);
     if (url.username || url.password || (!allowPrivate && privateHost) || (url.protocol !== 'https:' && !(allowPrivate && url.protocol === 'http:'))) return null;
     url.pathname = `${url.pathname.replace(/\/$/, '')}/chat/completions`;
     url.search = '';

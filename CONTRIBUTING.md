@@ -43,6 +43,7 @@ Use the smallest relevant gate while iterating, then run the full gate before re
 | Agent or TTS provider | `npx vitest run tests/unit/agent-route.test.ts tests/unit/tts-route.test.ts tests/unit/services.test.ts` | typecheck, lint, coverage, build |
 | Onboarding or UI | targeted Playwright `--grep` plus typecheck | lint, build, full desktop/mobile E2E |
 | Persistence or matchmaking | persistence/online unit tests | coverage, build, full E2E, Compose smoke when Docker changes |
+| Deployment configuration | `npx vitest run tests/unit/doctor.test.ts` | `npm run doctor` with a safe fixture environment, lint and diff check |
 | Documentation only | link and claim check | `git diff --check` |
 
 The CI workflow is authoritative and the security workflow runs CodeQL on pushes/PRs plus dependency review on pull requests.

@@ -36,6 +36,16 @@ ONLINE_MATCHING_ENABLED=1
 TRUST_PROXY=1
 ```
 
+保存配置后，直接用即将运行的 Docker 镜像做无密钥泄漏的静态体检；宿主机无需另装 Node.js：
+
+```bash
+docker compose build
+docker compose run --rm --no-deps web node scripts/doctor.mjs
+# 自动化平台可使用：在上一行末尾添加 --json
+```
+
+`doctor` 会把必需能力标为通过或失败，把尚未启用的可选能力标为提醒。报告不会输出环境变量值；只要存在 HTTPS、会话、SQLite、半套 OAuth/AI/TTS、非法 URL 或开关格式问题，就会返回非零退出码。它验证的是配置形状，不会向 Google、模型或 ElevenLabs 发起付费请求。
+
 只有当反向代理会覆盖客户端传入的 `X-Forwarded-*` 头时才能启用 `TRUST_PROXY=1`。应用容器仅监听宿主机 `127.0.0.1:3000`，不要直接把 3000 端口暴露到公网。
 
 启动并检查：
@@ -79,8 +89,13 @@ Caddy 会自动申请和续期证书。Nginx 用户应把 `Host`、`X-Forwarded-
 最稳妥的单机备份是在短暂停机后复制命名卷：
 
 ```bash
+GUANDAN_CONTAINER="$(docker compose ps -q web)"
+test -n "$GUANDAN_CONTAINER"
+GUANDAN_VOLUME="$(docker inspect "$GUANDAN_CONTAINER" --format '{{range .Mounts}}{{if eq .Destination "/data"}}{{.Name}}{{end}}{{end}}')"
+test -n "$GUANDAN_VOLUME"
 docker compose stop web
-docker run --rm -v guandan_guandan-data:/data -v "$PWD/backups:/backup" alpine \
+mkdir -p backups
+docker run --rm -v "$GUANDAN_VOLUME:/data:ro" -v "$PWD/backups:/backup" alpine \
   tar -czf /backup/guandan-$(date +%Y%m%d-%H%M%S).tar.gz -C /data .
 docker compose start web
 ```
