@@ -47,12 +47,32 @@ export function isSameOrigin(request: Request): boolean {
 }
 
 export class BodyTooLargeError extends Error {}
+export class ResponseTooLargeError extends Error {}
+
+async function readBoundedStream(stream: ReadableStream<Uint8Array>, maxBytes: number, ErrorType: typeof BodyTooLargeError | typeof ResponseTooLargeError): Promise<Uint8Array> {
+  const reader=stream.getReader(),chunks:Uint8Array[]=[];let total=0;
+  try {
+    while(true){const {done,value}=await reader.read();if(done)break;if(!value)continue;total+=value.byteLength;if(total>maxBytes){await reader.cancel();throw new ErrorType('stream too large')}chunks.push(value)}
+  } finally { reader.releaseLock(); }
+  const bytes=new Uint8Array(total);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.byteLength}return bytes;
+}
+
 export async function readJsonBody<T>(request: Request, maxBytes: number): Promise<T> {
   if (!request.body) throw new SyntaxError('missing body');
-  const reader=request.body.getReader(),chunks:Uint8Array[]=[];let total=0;
-  try {
-    while(true){const {done,value}=await reader.read();if(done)break;if(!value)continue;total+=value.byteLength;if(total>maxBytes){await reader.cancel();throw new BodyTooLargeError('body too large')}chunks.push(value)}
-  } finally { reader.releaseLock(); }
-  const bytes=new Uint8Array(total);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.byteLength}
+  const bytes=await readBoundedStream(request.body,maxBytes,BodyTooLargeError);
   return JSON.parse(new TextDecoder().decode(bytes)) as T;
+}
+
+export async function readResponseBytes(response: Response, maxBytes: number): Promise<Uint8Array> {
+  const declared=response.headers.get('content-length');
+  if(declared&&(/^\d+$/u.test(declared) ? Number(declared)>maxBytes : true)){
+    try{await response.body?.cancel()}catch{}
+    throw new ResponseTooLargeError('response too large');
+  }
+  if(!response.body)throw new Error('missing response body');
+  return readBoundedStream(response.body,maxBytes,ResponseTooLargeError);
+}
+
+export async function readResponseText(response: Response, maxBytes: number): Promise<string> {
+  return new TextDecoder().decode(await readResponseBytes(response,maxBytes));
 }

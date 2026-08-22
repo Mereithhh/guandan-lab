@@ -82,7 +82,9 @@ Caddy 会自动申请和续期证书。Nginx 用户应把 `Host`、`X-Forwarded-
 - ElevenLabs：`ELEVENLABS_API_KEY`、`ELEVENLABS_VOICE_ID`
 - 自愿支持二维码：把公开收款或赞助页面填入 `SUPPORT_URL`
 
-生产密钥只写入服务器 `.env.local`，不要提交到 Git。公开匿名流量启用付费服务前，应在反向代理增加连接级限流和每日预算告警。
+启用任一付费 Provider 时还必须设置 `PAID_PROVIDER_USER_DAILY_UNITS` 与 `PAID_PROVIDER_GLOBAL_DAILY_UNITS`；后者不得小于前者。可选成本、熔断与并发参数见 `.env.example`。单位是管理员定义的相对成本，不是货币或 Token 数。预算按 UTC 日在 SQLite 中持久化、原子扣减；删号不会返还全站预算，游客认领 Google 账户时会合并个人用量。
+
+生产密钥只写入服务器 `.env.local`，不要提交到 Git。熔断和并发计数是单 Node 进程内状态；公开流量还应在反向代理增加连接级限流，并在 Provider 控制台设置独立硬预算与告警。
 
 ## 备份与升级
 

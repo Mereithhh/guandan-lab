@@ -39,6 +39,13 @@ export interface StoredTrainingProfile {
   updatedAt: string | null;
 }
 
+export interface UsageQuotaResult {
+  allowed: boolean;
+  userUsed: number;
+  globalUsed: number;
+  resetAt: string;
+}
+
 const connectionPragmas = `
 PRAGMA foreign_keys = ON;
 PRAGMA journal_mode = WAL;
@@ -105,6 +112,12 @@ CREATE TABLE IF NOT EXISTS usage_quotas (
   used INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY(user_id, quota_key, period_start)
 );
+CREATE TABLE IF NOT EXISTS global_usage_quotas (
+  quota_key TEXT NOT NULL,
+  period_start TEXT NOT NULL,
+  used INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY(quota_key, period_start)
+);
 CREATE TABLE IF NOT EXISTS matchmaking_queue (
   user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
   joined_at TEXT NOT NULL
@@ -139,7 +152,7 @@ CREATE INDEX IF NOT EXISTS matches_user_finished ON matches(user_id, finished_at
 CREATE INDEX IF NOT EXISTS online_members_user ON online_room_members(user_id, joined_at DESC);
 `;
 
-const SUPPORTED_SCHEMA_VERSION = 4;
+const SUPPORTED_SCHEMA_VERSION = 5;
 
 function migrate(database: SqliteDatabase, version: number): void {
   if (version > SUPPORTED_SCHEMA_VERSION) throw new Error(`Database schema ${version} is newer than this server supports`);
@@ -277,6 +290,32 @@ export function getTrainingProfile(database: SqliteDatabase, userId: string): St
   return readTrainingRow(database, userId);
 }
 
+/** Atomically charges both the signed user and the whole deployment for a UTC day. */
+export function consumeUsageQuota(database: SqliteDatabase, claims: SessionClaims, quotaKey: string, units: number, userLimit: number, globalLimit: number, now = new Date()): UsageQuotaResult {
+  if (!/^[a-z][a-z0-9_-]{1,39}$/u.test(quotaKey) || !Number.isSafeInteger(units) || units < 1 || !Number.isSafeInteger(userLimit) || userLimit < 1 || !Number.isSafeInteger(globalLimit) || globalLimit < userLimit) throw new Error('Invalid usage quota configuration');
+  const periodStart = now.toISOString().slice(0, 10), reset = new Date(`${periodStart}T00:00:00.000Z`); reset.setUTCDate(reset.getUTCDate() + 1);
+  database.exec('BEGIN IMMEDIATE');
+  try {
+    const active = database.prepare(`SELECT 1 FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.id=? AND s.user_id=? AND s.expires_at>?`).get(claims.sid, claims.userId, now.toISOString());
+    if (!active) throw new Error('Provider session is no longer active');
+    const userUsed = database.prepare<{ used: number }>('SELECT used FROM usage_quotas WHERE user_id=? AND quota_key=? AND period_start=?').get(claims.userId, quotaKey, periodStart)?.used ?? 0;
+    const globalUsed = database.prepare<{ used: number }>('SELECT used FROM global_usage_quotas WHERE quota_key=? AND period_start=?').get(quotaKey, periodStart)?.used ?? 0;
+    if (userUsed + units > userLimit || globalUsed + units > globalLimit) {
+      database.exec('COMMIT');
+      return { allowed: false, userUsed, globalUsed, resetAt: reset.toISOString() };
+    }
+    database.prepare(`INSERT INTO usage_quotas(user_id,quota_key,period_start,used) VALUES(?,?,?,?) ON CONFLICT(user_id,quota_key,period_start) DO UPDATE SET used=used+excluded.used`).run(claims.userId, quotaKey, periodStart, units);
+    database.prepare(`INSERT INTO global_usage_quotas(quota_key,period_start,used) VALUES(?,?,?) ON CONFLICT(quota_key,period_start) DO UPDATE SET used=used+excluded.used`).run(quotaKey, periodStart, units);
+    database.prepare("DELETE FROM usage_quotas WHERE period_start < date(?, '-8 days')").run(periodStart);
+    database.prepare("DELETE FROM global_usage_quotas WHERE period_start < date(?, '-32 days')").run(periodStart);
+    database.exec('COMMIT');
+    return { allowed: true, userUsed: userUsed + units, globalUsed: globalUsed + units, resetAt: reset.toISOString() };
+  } catch (error) {
+    database.exec('ROLLBACK');
+    throw error;
+  }
+}
+
 export class TrainingRevisionConflictError extends Error {
   constructor(public readonly latest: StoredTrainingProfile) { super('Training profile revision conflict'); }
 }
@@ -302,10 +341,11 @@ export function saveTrainingProfile(database: SqliteDatabase, claims: SessionCla
   }
 }
 
-export function exportUserProgress(database: SqliteDatabase, userId: string): { profile: unknown; googleAccount: unknown; training: StoredTrainingProfile; matches: unknown[]; events: unknown[]; analyses: unknown[] } {
+export function exportUserProgress(database: SqliteDatabase, userId: string): { profile: unknown; googleAccount: unknown; usage: unknown[]; training: StoredTrainingProfile; matches: unknown[]; events: unknown[]; analyses: unknown[] } {
   return {
     profile: database.prepare('SELECT id,kind,display_name,created_at,updated_at FROM users WHERE id=?').get(userId) ?? null,
     googleAccount: database.prepare('SELECT provider_subject,email,created_at,updated_at FROM google_accounts WHERE user_id=?').get(userId) ?? null,
+    usage: database.prepare('SELECT quota_key,period_start,used FROM usage_quotas WHERE user_id=? ORDER BY period_start,quota_key').all(userId),
     training: getTrainingProfile(database, userId),
     matches: database.prepare('SELECT * FROM matches WHERE user_id=? ORDER BY finished_at').all(userId),
     events: database.prepare('SELECT e.* FROM match_events e JOIN matches m ON m.id=e.match_id WHERE m.user_id=? ORDER BY e.match_id,e.sequence').all(userId),
@@ -348,6 +388,9 @@ export function claimGoogleAccount(database: SqliteDatabase, guestUserId: string
       }
       database.prepare('DELETE FROM matches WHERE user_id=? AND seed IN (SELECT seed FROM matches WHERE user_id=?)').run(guestUserId, userId);
       database.prepare('UPDATE matches SET user_id=? WHERE user_id=?').run(userId, guestUserId);
+      database.prepare(`INSERT INTO usage_quotas(user_id,quota_key,period_start,used)
+        SELECT ?,quota_key,period_start,used FROM usage_quotas WHERE user_id=?
+        ON CONFLICT(user_id,quota_key,period_start) DO UPDATE SET used=used+excluded.used`).run(userId, guestUserId);
       database.prepare('UPDATE sessions SET user_id=? WHERE user_id=?').run(userId, guestUserId);
       database.prepare('DELETE FROM users WHERE id=?').run(guestUserId);
     }
