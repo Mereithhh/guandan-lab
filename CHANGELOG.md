@@ -8,6 +8,7 @@ All notable changes will be documented here.
 - Added transactional match/event/analysis storage, JSON export and account deletion.
 - Added optional Google OAuth with PKCE and transactional guest-progress claiming.
 - Added visible local/cloud save status with safe fallback on stateless hosts.
+- Added opt-in four-player server-authoritative matchmaking with private seat projections, idempotent versioned actions and polling reconnect.
 
 ## 0.2.0 — 2026-08-22
 

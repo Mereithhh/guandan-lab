@@ -19,8 +19,12 @@ Optional Google login uses Authorization Code + PKCE, a short-lived signed state
 
 When `SESSION_SECRET` or `DATABASE_PATH` is absent—or when the runtime has no persistent filesystem—the browser keeps the local replay store and the API reports `persistent: false`. This is the expected Cloudflare Sites fallback until a D1 adapter is configured.
 
-## Online target
+## Online self-host preview
 
-Online rooms must be server-authoritative. The server generates the deal, stores the full state, executes `legalPlay`, and returns a seat projection containing only the player's hand plus public information. Each action carries `matchId`, `actionId` and `expectedVersion`; accepted actions append an event and increment the version transactionally.
+Online rooms are server-authoritative. The SQLite adapter groups four signed users, generates and stores the deal, executes the shared rule engine, and returns a seat projection containing only the caller's hand plus public information. Deal seeds and opponents' hands are removed. Each action carries a unique `actionId` and `expectedVersion`; accepted actions are deduplicated, appended to `online_actions` and increment the room version transactionally.
 
-Cloudflare deployments can implement rooms with Durable Objects and D1. Single-node Docker deployments can use WebSocket plus SQLite. Both adapters share the rules core, DTOs and conformance tests.
+The first self-host release uses one-second HTTP polling. A refreshed browser discovers its active room through the signed session, which provides simple reconnect behavior without claiming WebSocket scale. Matchmaking entries expire after five minutes; a player can explicitly cancel the current room, and a room safely cancels after two minutes without an action so an abandoned seat cannot stall forever. Mutation routes have application rate limits. Public chat is intentionally absent. AI takeover, moderation reports and multi-instance coordination remain release gates.
+
+When TLS terminates at a reverse proxy, configure an HTTPS `SITE_URL`; alternatively set `TRUST_PROXY=1` only behind a proxy that overwrites forwarded headers. Origin checks and Secure cookies use that canonical public origin rather than the internal HTTP hop.
+
+Cloudflare deployments can later implement rooms with Durable Objects and D1. Multi-instance Docker deployments will need a coordinator or external database. Both future adapters must preserve the same rules core, privacy projection, action idempotency and conformance tests.

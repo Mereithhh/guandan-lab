@@ -1,6 +1,7 @@
 import { createAuthenticatedSession, readCookie, sessionCookie } from '@/lib/services/session';
 import { expiredGoogleOAuthCookie, GOOGLE_OAUTH_COOKIE, googleRedirectUri, verifyGoogleOAuthAttempt } from '@/lib/services/google-oauth';
 import { claimGoogleAccount, openProgressDatabase, upsertSession } from '@/lib/services/progress-store';
+import { isSecureRequest } from '@/lib/services/http-guard';
 
 export const runtime = 'edge';
 
@@ -8,7 +9,7 @@ function returnHome(request: Request, status: 'ok' | 'cancelled' | 'failed', coo
   const url = new URL('/', process.env.SITE_URL || request.url);
   url.searchParams.set('login', status);
   const response = new Response(null, { status: 302, headers: { location: url.toString() } });
-  response.headers.append('set-cookie', expiredGoogleOAuthCookie(new URL(request.url).protocol === 'https:'));
+  response.headers.append('set-cookie', expiredGoogleOAuthCookie(isSecureRequest(request)));
   if (cookie) response.headers.append('set-cookie', cookie);
   response.headers.set('cache-control', 'private, no-store');
   return response;
@@ -37,7 +38,7 @@ export async function GET(request: Request) {
     const claimed = claimGoogleAccount(database, attempt.guestUserId, { subject: profile.sub, email: profile.email, displayName: profile.name || profile.email.split('@')[0] });
     const session = await createAuthenticatedSession(secret, { userId: claimed.userId, kind: 'google', displayName: claimed.displayName });
     upsertSession(database, session.claims);
-    return returnHome(request, 'ok', sessionCookie(session.token, new URL(request.url).protocol === 'https:'));
+    return returnHome(request, 'ok', sessionCookie(session.token, isSecureRequest(request)));
   } catch { return returnHome(request, 'failed'); }
   finally { clearTimeout(timer); }
 }

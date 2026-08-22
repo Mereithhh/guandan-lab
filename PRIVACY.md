@@ -20,6 +20,10 @@ Google login is optional and disabled unless the operator configures it. The app
 
 Optional compatible-model requests contain a seat-limited observation and legal move IDs. Optional ElevenLabs requests contain the displayed coach sentence. Provider credentials stay on the server. Operators should review their chosen providers' policies and configure durable quotas before enabling paid services for anonymous public traffic.
 
+## Online rooms
+
+Self-hosted online matching stores room membership, the authoritative full deal and accepted actions. API projections include only the caller's hand, public plays and card counts; they omit the deal seed and opponents' hidden cards. Guest aliases are shown at the table; Google profile names and email addresses are never used as public table names. The preview has no chat. Room data currently follows the operator's database retention and backup policy.
+
 ## Operational data
 
 Reverse proxies and hosting platforms may retain IP addresses, user agents and request logs independently of the application database. Self-hosters should minimize log retention, protect `/data`, rotate `SESSION_SECRET` only with an account migration plan, and publish contact details for privacy requests.

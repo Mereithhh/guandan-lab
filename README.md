@@ -44,6 +44,8 @@ docker compose up --build
 
 可选 Google OAuth 使用 Authorization Code + PKCE。把 `${SITE_URL}/api/auth/google/callback` 注册为回调地址，再配置 `GOOGLE_CLIENT_ID` 与 `GOOGLE_CLIENT_SECRET`；登录后会在事务中把当前游客的历史认领到 Google 资料。项目只保存 Google subject、邮箱和显示名，不保存 Google access token。
 
+设置 `ONLINE_MATCHING_ENABLED=1` 可启用自托管四人真人匹配预览。服务端生成牌局、按乐观版本执行每个动作，并向玩家只投影自己的手牌和公开信息；浏览器每秒短轮询，因此刷新后能重新进入进行中的房间。该预览没有聊天，公网开放前仍应在反向代理层配置 TLS、连接级限流和监控。
+
 ## 可插拔 AI 与语音
 
 所有密钥只由服务端读取，绝不能使用 `NEXT_PUBLIC_*`：
@@ -81,7 +83,7 @@ npm run test:e2e
 
 ## 架构边界
 
-`lib/game` 是零 I/O 的确定性规则核心。当前公开 Demo 是单机训练模式，完整状态只存在浏览器，因此**不能**直接当作在线匹配服务。在线模式将采用服务端权威状态、座位投影、版本化事件日志与重连协议；详见 [架构说明](./docs/ARCHITECTURE.md)。
+`lib/game` 是零 I/O 的确定性规则核心。公开 Demo 默认以单机训练为主；自托管设置 `ONLINE_MATCHING_ENABLED=1` 后可启用四人真人匹配 Beta。在线房间采用服务端权威状态、仅本人手牌的座位投影、版本化动作日志、刷新重连、两分钟无操作取消和主动退出；详见 [架构说明](./docs/ARCHITECTURE.md)。
 
 自托管长期路线是 Node BFF + SQLite 单实例；Cloudflare Sites 路线使用 D1 + Durable Objects。两者共享规则核心和网络协议，不共享存储实现。
 
@@ -90,7 +92,7 @@ npm run test:e2e
 - `0.2`：开源基础、陈总训练场景、兼容 AI Provider、ElevenLabs TTS、Docker。
 - `0.3`：5–7 张迷你残局、动态教练、真实事件记牌训练、角色化 Agent。
 - `0.4`：游客云存档、SQLite、自助导出/删除与 Google OAuth 数据认领已进入自托管预览。
-- `0.5`：服务端权威在线房间、匹配、断线重连、举报与安全机制。
+- `0.5`：服务端权威四人匹配、隐私投影和轮询重连已进入自托管预览；超时、投降和举报仍在开发。
 - `1.0`：规则变体插件、Agent 锦标赛、稳定协议与可复用规则 SDK。
 
 路线图不是已上线能力。完整状态和验收标准见 [ROADMAP.md](./ROADMAP.md)。

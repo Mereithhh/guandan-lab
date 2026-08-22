@@ -20,10 +20,11 @@ Roadmap items are proposals until their acceptance checks pass. We do not advert
 
 ## 0.5 — Online rooms
 
-- Move deal generation and rule validation to a server-authoritative room state machine.
-- Return only seat projections; never send the seed or opponents' hands.
-- Add action IDs, optimistic versions, reconnect, timeout and surrender behavior.
-- Add matching cooldown, abuse reporting and chat safety before public matchmaking.
+- [x] Move deal generation and rule validation to a server-authoritative SQLite room state machine.
+- [x] Return only seat projections; never send the seed or opponents' hands.
+- [x] Add action IDs, optimistic versions and polling-based reconnect.
+- Add AI seat takeover after a player timeout (the current Beta safely cancels the room).
+- Add abuse reporting before public matchmaking; chat remains intentionally absent.
 
 ## 1.0 — Ecosystem
 

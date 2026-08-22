@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { normalizeBaseUrl, parseAgentMove, providerChatCompletionsUrl } from '../../lib/services/compatible-agent';
 import { elevenLabsSpeechUrl, MAX_TTS_CHARS, normalizeVoiceText } from '../../lib/services/tts';
-import { BodyTooLargeError, consumeRateLimit, isSameOrigin, readJsonBody } from '../../lib/services/http-guard';
+import { BodyTooLargeError, consumeRateLimit, isSameOrigin, isSecureRequest, publicRequestOrigin, readJsonBody } from '../../lib/services/http-guard';
 
 describe('service boundaries', () => {
   it('normalizes and bounds TTS text', () => {
@@ -15,6 +15,11 @@ describe('service boundaries', () => {
     expect(isSameOrigin(new Request('https://game.example/api/tts', { headers: { origin: 'https://game.example' } }))).toBe(true);
     expect(isSameOrigin(new Request('https://game.example/api/tts', { headers: { origin: 'https://evil.example' } }))).toBe(false);
     expect(isSameOrigin(new Request('https://game.example/api/tts'))).toBe(false);
+    expect(publicRequestOrigin(new Request('http://127.0.0.1/api'), 'https://game.example')).toBe('https://game.example');
+    expect(isSameOrigin(new Request('http://127.0.0.1/api', { headers: { origin: 'https://game.example' } }))).toBe(false);
+    expect(isSameOrigin(new Request('http://127.0.0.1/api', { headers: { origin: 'https://game.example', 'x-forwarded-proto': 'https', 'x-forwarded-host': 'game.example' } }))).toBe(false);
+    expect(publicRequestOrigin(new Request('http://127.0.0.1/api', { headers: { 'x-forwarded-proto': 'https', 'x-forwarded-host': 'game.example' } }), undefined, true)).toBe('https://game.example');
+    expect(isSecureRequest(new Request('https://game.example/api'))).toBe(true);
     expect(consumeRateLimit('test:one', 2, 1000, 10)).toBe(true);
     expect(consumeRateLimit('test:one', 2, 1000, 11)).toBe(true);
     expect(consumeRateLimit('test:one', 2, 1000, 12)).toBe(false);

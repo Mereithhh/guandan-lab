@@ -13,8 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -26,14 +26,18 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - run: docker build -t guandan-lab:ci .
-      - name: Smoke-test the read-only container
+      - name: Smoke-test persistent read-only container
         run: |
           cleanup() {
             docker logs guandan-lab-ci 2>&1 || true
             docker rm -f guandan-lab-ci >/dev/null 2>&1 || true
+            docker volume rm guandan-lab-ci-data >/dev/null 2>&1 || true
           }
           trap cleanup EXIT
-          docker run -d --name guandan-lab-ci --read-only --tmpfs /tmp -p 127.0.0.1:3000:3000 guandan-lab:ci
+          docker volume create guandan-lab-ci-data >/dev/null
+          docker run -d --name guandan-lab-ci --read-only --tmpfs /tmp -v guandan-lab-ci-data:/data \
+            -e DATABASE_PATH=/data/ci.sqlite -e SESSION_SECRET=ci-session-secret-with-more-than-32-characters \
+            -p 127.0.0.1:3000:3000 guandan-lab:ci
           ready=0
           for attempt in {1..30}; do
             if curl --fail --silent --show-error http://127.0.0.1:3000/ >/dev/null; then
@@ -48,3 +52,4 @@ jobs:
           test "$ready" = 1
           test "$(docker inspect --format='{{.Config.User}}' guandan-lab-ci)" = node
           test "$(docker inspect --format='{{.HostConfig.ReadonlyRootfs}}' guandan-lab-ci)" = true
+          curl --fail --silent --show-error http://127.0.0.1:3000/api/session | grep '"persistent":true'

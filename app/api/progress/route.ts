@@ -1,6 +1,6 @@
 import type { GameState } from '@/lib/game/types';
-import { BodyTooLargeError, consumeRateLimit, isSameOrigin, readJsonBody, requestClientKey } from '@/lib/services/http-guard';
-import { deleteUserProgress, exportUserProgress, listMatchSummaries, openProgressDatabase, saveCompletedMatch, type MatchAnalysisInput } from '@/lib/services/progress-store';
+import { BodyTooLargeError, consumeRateLimit, isSameOrigin, isSecureRequest, readJsonBody, requestClientKey } from '@/lib/services/http-guard';
+import { deleteUserProgress, exportUserProgress, hasOnlinePresence, isSessionActive, listMatchSummaries, listStoredGames, openProgressDatabase, saveCompletedMatch, type MatchAnalysisInput } from '@/lib/services/progress-store';
 import { expiredSessionCookie, readCookie, SESSION_COOKIE, verifySession } from '@/lib/services/session';
 
 export const runtime = 'edge';
@@ -12,7 +12,7 @@ async function context(request: Request) {
   if (!claims) return null;
   try {
     const database = await openProgressDatabase();
-    return database ? { claims, database } : null;
+    return database && isSessionActive(database, claims) ? { claims, database } : null;
   } catch { return null; }
 }
 
@@ -22,7 +22,8 @@ export async function GET(request: Request) {
   if (new URL(request.url).searchParams.get('export') === '1') {
     return Response.json(exportUserProgress(current.database, current.claims.userId), { headers: { 'content-disposition': 'attachment; filename="guandan-progress.json"', 'cache-control': 'private, no-store' } });
   }
-  return Response.json({ persistent: true, matches: listMatchSummaries(current.database, current.claims.userId) }, { headers: { 'cache-control': 'private, no-store' } });
+  const includeReplays = new URL(request.url).searchParams.get('replays') === '1';
+  return Response.json({ persistent: true, matches: listMatchSummaries(current.database, current.claims.userId), replays: includeReplays ? listStoredGames(current.database, current.claims.userId) : undefined }, { headers: { 'cache-control': 'private, no-store' } });
 }
 
 export async function POST(request: Request) {
@@ -45,8 +46,9 @@ export async function DELETE(request: Request) {
   if (!consumeRateLimit(requestClientKey(request, 'progress-delete', process.env.TRUST_PROXY === '1'), 5, 60 * 60_000)) return Response.json({ error: '删除请求过于频繁' }, { status: 429 });
   const current = await context(request);
   if (!current) return Response.json({ error: '云端存档未启用' }, { status: 503 });
+  if (hasOnlinePresence(current.database, current.claims.userId)) return Response.json({ error: '请先离开匹配或当前真人牌局，再删除资料' }, { status: 409 });
   deleteUserProgress(current.database, current.claims.userId);
   const response = Response.json({ deleted: true });
-  response.headers.append('set-cookie', expiredSessionCookie(new URL(request.url).protocol === 'https:'));
+  response.headers.append('set-cookie', expiredSessionCookie(isSecureRequest(request)));
   return response;
 }
