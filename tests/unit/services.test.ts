@@ -37,6 +37,7 @@ describe('service boundaries', () => {
     expect(parseAgentMove('{"move":["c","b"]}', legal)).toEqual(['c', 'b']);
     expect(parseAgentMove('```json\n{"move":null}\n```', legal)).toBeNull();
     expect(parseAgentMove('{"move":["hacked"]}', legal)).toBeNull();
+    expect(parseAgentMove('{"move":["a","b"]}', [['a|b']])).toBeNull();
     expect(normalizeBaseUrl(' https://example.com/v1/// ')).toBe('https://example.com/v1');
     expect(providerChatCompletionsUrl('https://example.com/v1')).toBe('https://example.com/v1/chat/completions');
     expect(providerChatCompletionsUrl('http://127.0.0.1:11434/v1')).toBeNull();
