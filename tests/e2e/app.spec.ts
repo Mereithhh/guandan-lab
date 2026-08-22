@@ -758,6 +758,7 @@ test("online lobby is directly usable on mobile while local play remains availab
   test.skip(testInfo.project.name !== "mobile", "mobile-only coverage");
   await page.goto("/");
   await expect(page.getByTestId("direct-game")).toBeVisible();
+  await expect(page.getByTestId("online-match")).toHaveText("在线匹配 ▶");
   await page.getByTestId("online-match").click();
   await expect(
     page.getByRole("heading", { name: "四人真人匹配" }),
