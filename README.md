@@ -2,11 +2,22 @@
 
 > 快速会打，体面上桌。不是教你赢老板，是教你成为大家愿意再约的搭档。
 
+[English README](./README_EN.md)
+
+[![CI](https://github.com/Mereithhh/guandan-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/Mereithhh/guandan-lab/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/Mereithhh/guandan-lab?include_prereleases)](https://github.com/Mereithhh/guandan-lab/releases)
+[![License](https://img.shields.io/github/license/Mereithhh/guandan-lab)](./LICENSE)
+[![Try the public demo](https://img.shields.io/badge/demo-play_now-57e3bd)](https://guandan-bootcamp.miromind-0889.chatgpt.site)
+
+[▶ 在线体验](https://guandan-bootcamp.miromind-0889.chatgpt.site) · [☆ Star 项目](https://github.com/Mereithhh/guandan-lab/stargazers) · [⌘ 本机运行](#快速启动)
+
 [在线体验](https://guandan-bootcamp.miromind-0889.chatgpt.site) · [部署指南](./docs/DEPLOYMENT.md) · [路线图](./ROADMAP.md) · [Launch Kit](./docs/LAUNCH_KIT.md) · [素材授权](./docs/ASSETS.md) · [隐私说明](./PRIVACY.md) · [参与贡献](./CONTRIBUTING.md)
 
-GuanDan Lab 是一个开源的零基础掼蛋训练器。它把确定性的竞技规则引擎、不会偷看牌的 AI 陪练、记牌训练和逐手复盘放在同一个 15 分钟学习路径里。默认场景是陪虚构角色“陈总”上桌：目标是节奏舒服、配合清楚、牌品可靠，而不是故意输牌或暗示牌情。
+GuanDan Lab 是一个开源的零基础掼蛋训练器。它先用标称 15 分钟的 mastery 课程教授核心规则，再让用户进入不会偷看牌的 AI 整副陪练、记牌训练和逐手复盘。默认场景是陪虚构角色“陈总”上桌：目标是节奏舒服、配合清楚、牌品可靠，而不是故意输牌或暗示牌情。
 
 ![GuanDan Lab 真实产品演示：训练入口、课程、记牌与 AI 牌桌](./public/walkthrough.gif)
+
+[确定性核心与 32 项一致性检查](./tests/unit/conformance.test.ts) · [公平 AI 的可见信息边界](./docs/ARCHITECTURE.md) · [103 项测试与 CI 证据](https://github.com/Mereithhh/guandan-lab/pull/13) · [beta.5 安全审查记录](./docs/SECURITY_REVIEW_BETA5.md)
 
 ## 已经可以做什么
 
@@ -17,7 +28,7 @@ GuanDan Lab 是一个开源的零基础掼蛋训练器。它把确定性的竞�
 - 首页、15 分钟 mastery 课程与完整规则支持中英双语；键盘可操作的语言选择会保存在本机，牌局规则逻辑不复制。
 - 同点手牌叠放、可调 AI 节奏、最近出牌记录、一键合法提示。
 - 基于真实双副牌 ID 的已见牌减法、位置九宫格、完整事件回放，以及牌技分与社交分分离的赛后建议。
-- 游客模式无需注册；浏览器始终保留最近训练记录，自托管配置 SQLite 后会同步完整事件与分析。
+- 游客模式无需注册；浏览器支持且未清理 localStorage 时会保存最近完成的训练记录，自托管配置 SQLite 后可同步完整事件与分析。
 
 <details>
 <summary>查看真实界面截图</summary>
@@ -129,4 +140,4 @@ npm run test:e2e
 
 代码使用 [Apache License 2.0](./LICENSE)。AI 生成的原创品牌图片会在提交记录中标明；扑克花色字符属于通用符号。项目名称与视觉标识暂不作为兼容实现的背书。
 
-欢迎提交规则牌例、地区变体资料、Agent 策略、无障碍改进和新手课程设计。请先阅读 [贡献指南](./CONTRIBUTING.md) 与 [安全策略](./SECURITY.md)。
+欢迎提交规则牌例、地区变体资料、Agent 策略、无障碍改进和新手课程设计。可以从 [good first issue](https://github.com/Mereithhh/guandan-lab/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) 开始，并先阅读 [贡献指南](./CONTRIBUTING.md) 与 [安全策略](./SECURITY.md)。

@@ -1,5 +1,7 @@
 # Production deployment
 
+[English deployment guide](./DEPLOYMENT_EN.md)
+
 GuanDan Lab 支持两种互斥的生产入口：托管 Sites Demo，或你自己的单机 Docker 服务。前者适合公开体验但当前无持久数据库；后者可以启用 SQLite、Google OAuth、付费 AI/TTS 和四人匹配。
 
 ## 方案 A：Sites 公开 Demo

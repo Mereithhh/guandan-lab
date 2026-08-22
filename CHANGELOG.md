@@ -4,6 +4,17 @@ All notable changes will be documented here.
 
 ## Unreleased
 
+## 0.3.0-beta.6 — 2026-08-22
+
+- Slowed the default AI table pace to 2.2 seconds, added a 3.5-second explanation pace, and remembers the player's choice on the device.
+- Expanded the in-table history from the latest 12 actions to the complete current deal, with clearer replay guidance.
+- Made same-rank hand stacking visibly consistent on desktop and mobile, including per-rank count badges while retaining individual card selection.
+- Added a complete English README, evidence-first launch copy and clearer Demo/Star/Run-locally contribution paths.
+- Added CodeQL and pull-request dependency review plus a scoped public beta.5 adversarial review record.
+- Corrected the 15-minute and localStorage claims so they match the measured product boundary.
+- Added an original before/after training social illustration and documented its reusable asset license.
+- Opened bounded good-first contribution issues and expanded the contributor code map and test matrix.
+
 ## 0.3.0-beta.5 — 2026-08-22
 
 - Added a typed Chinese/English onboarding layer for the home page, mastery course and full rulebook, with a keyboard-accessible persisted language switch.
