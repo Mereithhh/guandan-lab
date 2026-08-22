@@ -5,7 +5,7 @@ function request(legalMoves:string[][]=[['card-a']]){
   return new Request('https://game.example/api/agent',{
     method:'POST',
     headers:{origin:'https://game.example','content-type':'application/json'},
-    body:JSON.stringify({observation:{events:[]},legalMoves}),
+    body:JSON.stringify({observation:{persona:'control',events:[],privateHands:['must-not-leave-route']},legalMoves}),
   });
 }
 
@@ -33,6 +33,7 @@ describe('compatible agent route contract',()=>{
     expect(init?.redirect).toBe('error');
     expect((init?.headers as Record<string,string>).authorization).toBe('Bearer server-agent-secret');
     expect(String(init?.body)).not.toContain('server-agent-secret');
+    expect(String(init?.body)).not.toContain('must-not-leave-route');
   });
 
   it('rejects unsafe provider URLs and cross-origin callers before fetch',async()=>{
@@ -67,10 +68,17 @@ describe('compatible agent route contract',()=>{
     }
   });
 
-  it('returns null instead of accepting a provider move absent from the exact legal set',async()=>{
+  it('rejects a provider move absent from the exact legal set so the client can use local fallback',async()=>{
     configure();
     vi.stubGlobal('fetch',vi.fn<typeof fetch>(async()=>Response.json({choices:[{message:{content:'{"move":["a","b"]}'}}]})));
     const response=await POST(request([['a|b']]));
+    expect(response.status).toBe(502);
+  });
+
+  it('preserves an explicit legal pass from the provider',async()=>{
+    configure();
+    vi.stubGlobal('fetch',vi.fn<typeof fetch>(async()=>Response.json({choices:[{message:{content:'{"move":null}'}}]})));
+    const response=await POST(request());
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({move:null});
   });
@@ -98,4 +106,6 @@ describe('compatible agent route contract',()=>{
     expect(response.status).toBe(413);
     expect(provider).not.toHaveBeenCalled();
   });
+
+  it('rejects observations without a known character persona',async()=>{configure();const provider=vi.fn<typeof fetch>();vi.stubGlobal('fetch',provider);const invalid=new Request('https://game.example/api/agent',{method:'POST',headers:{origin:'https://game.example','content-type':'application/json'},body:JSON.stringify({observation:{events:[]},legalMoves:[['card-a']]})});const response=await POST(invalid);expect(response.status).toBe(400);expect(provider).not.toHaveBeenCalled()});
 });

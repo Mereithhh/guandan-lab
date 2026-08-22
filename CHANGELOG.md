@@ -4,6 +4,14 @@ All notable changes will be documented here.
 
 ## Unreleased
 
+## 0.3.0-beta.10 — 2026-08-22
+
+- Added three distinct, deterministic AI character styles: Chen controls with structure, Gu yields earlier to a nearly-out partner, and Lin prioritizes efficient multi-card shedding.
+- Passed the same bounded persona IDs to compatible model Agents while retaining exact local legal-move validation and deterministic fallback.
+- Exposed each character's style at the table, in live history and in replay context, with accessible descriptions and turn-by-turn coach explanations.
+- Made character descriptions tappable, clarified public-card history ordering and hand types, and kept compatible-model explanations neutral unless the local policy can prove the stated reason.
+- Rebuilt compatible-provider observations from a strict allowlist and distinguished explicit passes from invalid output or timeouts so failures use the deterministic local fallback.
+
 ## 0.3.0-beta.9 — 2026-08-22
 
 - Added optional compatible-model post-match coaching from public play events, with an explicit local-evidence fallback in the result dialog.

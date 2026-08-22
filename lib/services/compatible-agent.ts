@@ -26,22 +26,30 @@ export function providerChatCompletionsUrl(value: string, allowPrivate = false):
   } catch { return null; }
 }
 
-export function parseAgentMove(content: string, legalMoves: string[][]): string[] | null {
+export type ParsedAgentDecision={valid:true;move:string[]|null}|{valid:false};
+
+export function parseAgentDecision(content: string, legalMoves: string[][]):ParsedAgentDecision {
   const cleaned = content.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
   let value: unknown;
   try {
     value = JSON.parse(cleaned);
   } catch {
     const match = cleaned.match(/\{[\s\S]*\}/);
-    if (!match) return null;
-    try { value = JSON.parse(match[0]); } catch { return null; }
+    if (!match) return {valid:false};
+    try { value = JSON.parse(match[0]); } catch { return {valid:false}; }
   }
   const move = (value as {move?: unknown})?.move;
-  if (move === null) return null;
-  if (!Array.isArray(move) || move.some(id => typeof id !== 'string')) return null;
+  if (move === null) return {valid:true,move:null};
+  if (!Array.isArray(move) || move.some(id => typeof id !== 'string')) return {valid:false};
   const selected = [...move].sort();
-  return legalMoves.some(candidate => {
+  const valid=legalMoves.some(candidate => {
     const legal = [...candidate].sort();
     return legal.length === selected.length && legal.every((id, index) => id === selected[index]);
-  }) ? move as string[] : null;
+  });
+  return valid?{valid:true,move:move as string[]}:{valid:false};
+}
+
+export function parseAgentMove(content: string, legalMoves: string[][]): string[] | null {
+  const decision=parseAgentDecision(content,legalMoves);
+  return decision.valid?decision.move:null;
 }

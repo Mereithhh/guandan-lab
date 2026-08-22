@@ -35,7 +35,7 @@ export function sanitizePublicMatchReview(value:unknown):PublicMatchReview|null{
 }
 
 const styleCatalog={balanced:'均衡协作型',observant:'稳健观察型',partnerFirst:'搭档优先型',control:'牌权控制型'} as const;
-const adviceCatalog={observeTempo:'先按公开出牌顺序复盘节奏；看清谁取得牌权后，再决定下一圈是否主动压牌。',partnerPriority:'搭档出牌后先看他的公开剩余张数；搭档接近报牌时，优先让他保持牌权。',bombTiming:'炸弹用于对手公开报牌或关键牌权争夺，避免在普通圈次过早消耗。',leadEfficiency:'取得首出权后，优先整理能连续带走的组合，减少用大单张试探造成的牌权浪费。',clearCommunication:'牌桌表达只确认规则、轮次和公开信息；不约暗号、不暗示手牌，也不为了讨好任何人故意输牌。',memoryReview:'回放时按圈记录已见大牌与炸弹，下一副先练“公开事件减法”，不要猜测未出暗牌。'} as const;
+const adviceCatalog={observeTempo:'先按公开出牌顺序复盘节奏；看清谁取得牌权后，再决定下一圈是否主动压牌。',partnerPriority:'搭档出牌后先看他的公开剩余张数；搭档接近出完时，优先让他保持牌权。',bombTiming:'炸弹用于对手公开报牌或关键牌权争夺，避免在普通圈次过早消耗。',leadEfficiency:'取得首出权后，优先整理能连续带走的组合，减少用大单张试探造成的牌权浪费。',clearCommunication:'牌桌表达只确认规则、轮次和公开信息；不约暗号、不暗示手牌，也不为了讨好任何人故意输牌。',memoryReview:'回放时按圈记录已见大牌与炸弹，下一副先练“公开事件减法”，不要猜测未出暗牌。'} as const;
 type StyleCode=keyof typeof styleCatalog;type AdviceCode=keyof typeof adviceCatalog;
 
 export function parseRemoteMatchReview(content:string):RemoteMatchReview|null{

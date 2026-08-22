@@ -1,4 +1,4 @@
-import { parseAgentMove, providerChatCompletionsUrl, type CompatibleAgentRequest } from '@/lib/services/compatible-agent';
+import { parseAgentDecision, providerChatCompletionsUrl, type CompatibleAgentRequest } from '@/lib/services/compatible-agent';
 import { BodyTooLargeError, consumeRateLimit, isSameOrigin, readJsonBody, requestClientKey } from '@/lib/services/http-guard';
 
 export const runtime = 'edge';
@@ -13,7 +13,8 @@ export async function POST(request: Request) {
   if (!endpoint) return Response.json({ error: 'AI Base URL 不符合安全策略' }, { status: 500 });
   let input: CompatibleAgentRequest;
   try { input = await readJsonBody<CompatibleAgentRequest>(request,200_000); } catch(error) { return Response.json({ error: error instanceof BodyTooLargeError?'请求过大':'请求格式无效' }, { status: error instanceof BodyTooLargeError?413:400 }); }
-  if (!input?.observation || !Array.isArray(input.legalMoves) || input.legalMoves.length > 500 || input.legalMoves.some(move=>!Array.isArray(move)||move.length>12||move.some(id=>typeof id!=='string'||id.length>40)) || input.observation.events?.length>300) return Response.json({ error: '牌局数据无效' }, { status: 400 });
+  if (!input?.observation || !['learner','control','partnerFirst','tempo'].includes(input.observation.persona) || !Array.isArray(input.legalMoves) || input.legalMoves.length > 500 || input.legalMoves.some(move=>!Array.isArray(move)||move.length>12||move.some(id=>typeof id!=='string'||id.length>40)) || input.observation.events?.length>300) return Response.json({ error: '牌局数据无效' }, { status: 400 });
+  const o=input.observation,cleanCard=(card:typeof o.hand[number])=>({id:card.id,suit:card.suit,rank:card.rank,deck:card.deck}),providerInput={observation:{seat:o.seat,role:o.role,persona:o.persona,hand:Array.isArray(o.hand)?o.hand.map(cleanCard):[],level:o.level,turn:o.turn,lastPlay:o.lastPlay?{seat:o.lastPlay.seat,cardIds:o.lastPlay.cardIds,combo:{kind:o.lastPlay.combo.kind,size:o.lastPlay.combo.size,mainRank:o.lastPlay.combo.mainRank,cards:o.lastPlay.combo.cards.map(cleanCard),wildIds:o.lastPlay.combo.wildIds}}:null,counts:Array.isArray(o.counts)?o.counts.slice(0,4):[],events:Array.isArray(o.events)?o.events.map(event=>({id:event.id,type:event.type,seat:event.seat,cardIds:event.cardIds,at:event.at,note:event.note})):[]},legalMoves:input.legalMoves};
 
   const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 4500);
   try {
@@ -23,8 +24,8 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         model, temperature: 0.25, max_tokens: 120,
         messages: [
-          { role: 'system', content: '你是遵守竞技掼蛋规则的牌局 Agent。只能从 legalMoves 原样选择一项；需要过牌时返回 null。只输出 JSON：{"move":["card-id"]} 或 {"move":null}。优先配合搭档，避免无谓炸弹。' },
-          { role: 'user', content: JSON.stringify(input) },
+          { role: 'system', content: '你是遵守竞技掼蛋规则的角色化牌局 Agent。只能从 legalMoves 原样选择一项；需要过牌时返回 null。只输出 JSON：{"move":["card-id"]} 或 {"move":null}。遵循 observation.persona：control 稳健控场，partnerFirst 搭档优先，tempo 优先高效出牌，learner 使用低风险训练策略；所有风格都要避免无谓炸弹，不得猜测未提供的暗牌。' },
+          { role: 'user', content: JSON.stringify(providerInput) },
         ],
       }),
     });
@@ -34,7 +35,9 @@ export async function POST(request: Request) {
     const data = JSON.parse(raw) as {choices?: Array<{message?: {content?: string}}>};
     const content = data.choices?.[0]?.message?.content;
     if (typeof content !== 'string' || !content.trim()) return Response.json({ error: '远程 AI 返回为空' }, { status: 502 });
-    return Response.json({ move: parseAgentMove(content, input.legalMoves) });
+    const decision=parseAgentDecision(content,input.legalMoves);
+    if(!decision.valid)return Response.json({ error: '远程 AI 返回了非法动作' }, { status: 502 });
+    return Response.json({ move: decision.move });
   } catch {
     const timedOut=controller.signal.aborted;
     return Response.json({ error: timedOut?'远程 AI 请求超时':'远程 AI 响应无效' }, { status: timedOut?504:502 });
