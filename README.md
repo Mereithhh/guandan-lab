@@ -17,7 +17,7 @@ GuanDan Lab 是一个开源的零基础掼蛋训练器。它先用标称 15 分�
 
 ![GuanDan Lab 真实产品演示：训练入口、课程、记牌与 AI 牌桌](./public/walkthrough.gif)
 
-[确定性核心与 32 项一致性检查](./tests/unit/conformance.test.ts) · [公平 AI 的可见信息边界](./docs/ARCHITECTURE.md) · [103 项测试与 CI 证据](https://github.com/Mereithhh/guandan-lab/pull/13) · [beta.5 安全审查记录](./docs/SECURITY_REVIEW_BETA5.md)
+[确定性核心与 32 项一致性检查](./tests/unit/conformance.test.ts) · [公平 AI 的可见信息边界](./docs/ARCHITECTURE.md) · 108 项单元/契约测试 · [beta.5 安全审查记录](./docs/SECURITY_REVIEW_BETA5.md)
 
 ## 已经可以做什么
 
@@ -26,6 +26,7 @@ GuanDan Lab 是一个开源的零基础掼蛋训练器。它先用标称 15 分�
 - 本地确定性 Agent 永远可用；配置兼容 OpenAI 的服务端接口后，可让大模型决策，返回动作仍会经过本地合法性校验。
 - 配置 ElevenLabs 后使用中文语音教练；未配置或请求失败时回退到设备语音，字幕始终存在。
 - 首页、15 分钟 mastery 课程与完整规则支持中英双语；键盘可操作的语言选择会保存在本机，牌局规则逻辑不复制。
+- 课程后提供 5 个可选的确定性“陈总局”迷你残局：每关只有 5—7 张手牌，所有候选动作经真实规则引擎校验，并分别解释牌技与牌桌表达。
 - 同点手牌叠放、可调 AI 节奏、最近出牌记录、一键合法提示。
 - 基于真实双副牌 ID 的已见牌减法、位置九宫格、完整事件回放，以及牌技分与社交分分离的赛后建议。
 - 游客模式无需注册；浏览器支持且未清理 localStorage 时会保存最近完成的训练记录，自托管配置 SQLite 后可同步完整事件与分析。
@@ -123,7 +124,7 @@ npm run test:e2e
 
 - `0.2`：开源基础、陈总训练场景、兼容 AI Provider、ElevenLabs TTS、Docker。
 - `0.3 beta`：游客云存档、SQLite、Google OAuth 数据认领、服务端权威四人匹配与轮询重连进入自托管预览。
-- `0.4`：5–7 张迷你残局、阶段牌风反馈、角色化 Agent 与掉线 AI 托管。
+- `0.4`：阶段牌风反馈、角色化 Agent 与掉线 AI 托管。
 - `0.5`：举报、观战、稳定房间协议与多实例协调。
 - `1.0`：规则变体插件、Agent 锦标赛、稳定协议与可复用规则 SDK。
 
