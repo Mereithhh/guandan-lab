@@ -4,6 +4,15 @@ All notable changes will be documented here.
 
 ## Unreleased
 
+## 0.3.0-beta.9 — 2026-08-22
+
+- Added optional compatible-model post-match coaching from public play events, with an explicit local-evidence fallback in the result dialog.
+- Kept deterministic card-skill scores, social scores, metrics and displayed coaching copy authoritative; the model can select only controlled style/advice codes.
+- Added a strict known-field privacy boundary that excludes all unplayed hands and hidden-derived metrics, plus route contracts for hidden-field injection, origin, URL, size, timeout and secret-redaction failures.
+- Added browser-side timeout fallback, executable anti-collusion coaching filters, a fixed ethics reminder, and cloud-save contract regression coverage.
+- Made long result coaching scrollable on small/landscape screens and surfaced save status, privacy scope and retry inside the result dialog.
+- Made browser-local save status depend on the actual storage write, with an explicit failure state and retry instead of optimistic success copy.
+
 ## 0.3.0-beta.8 — 2026-08-22
 
 - Added five optional deterministic 5–7 card “Chen table” endgames as a bridge from course mastery to the full 108-card deal, with immediate rules and table-manner feedback.
