@@ -48,7 +48,7 @@ GuanDan Lab turns those gaps into one verifiable training loop:
 - Same-rank hand stacks, adjustable AI pacing, expandable live play history and one-click legal hints.
 - Installable Web App metadata, search discovery files, truthful structured data and a system share action without tracking parameters.
 - Event-based card-counting, a nine-grid memory drill and complete local match replays.
-- Guest-first use with no registration. When localStorage is available and retained, the browser saves recently completed training; optional SQLite persistence, Google OAuth progress claiming and four-player server-authoritative matchmaking are available for self-hosting.
+- Guest-first use with no registration. When localStorage is retained, the browser saves training locally; self-hosted SQLite uses revision checks and local-delta replay to merge course, endgame, bounded memory, preference and replay progress across devices without letting a stale device relock earned lessons or replace a full server history. Google OAuth claiming and four-player server-authoritative matchmaking remain optional.
 - Docker deployment with a named SQLite volume and capability smoke tests in CI.
 
 The hosted demo currently runs the local rules Agent and device voice. Paid AI, ElevenLabs, Google OAuth, SQLite cloud saves and online matchmaking are opt-in self-hosted capabilities; the UI reports the active mode instead of pretending they are enabled.
@@ -75,7 +75,7 @@ cp .env.example .env.local
 docker compose up --build
 ```
 
-The default database lives at `/data/guandan.sqlite` in a named Docker volume. If `SESSION_SECRET` is missing, the application fails closed to browser-local saves instead of issuing forgeable production sessions.
+The default database lives at `/data/guandan.sqlite` in a named Docker volume and stores signed sessions, bounded training profiles, matches, event evidence and analyses. If `SESSION_SECRET` is missing, the application fails closed to browser-local saves instead of issuing forgeable production sessions.
 
 Before a public Docker deployment, run `docker compose run --rm --no-deps web node scripts/doctor.mjs --lang=en`; local Node development may use `npm run doctor -- --lang=en`. It checks sessions, SQLite, HTTPS, OAuth, matching, compatible models, ElevenLabs and the support link without printing any secret; production blockers return a non-zero exit code.
 

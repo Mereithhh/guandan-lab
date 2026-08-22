@@ -1,5 +1,6 @@
 import type { GameState } from '@/lib/game/types';
 import type { SessionClaims } from './session';
+import { EMPTY_TRAINING_PROFILE, mergeTrainingProfiles, parseTrainingProfile, type TrainingProfile } from './training-profile';
 
 interface Statement<Row = Record<string, unknown>> {
   run(...values: unknown[]): unknown;
@@ -30,6 +31,12 @@ export interface MatchAnalysisInput {
   title: string;
   advice: string[];
   metrics: Record<string, number>;
+}
+
+export interface StoredTrainingProfile {
+  profile: TrainingProfile;
+  revision: number;
+  updatedAt: string | null;
 }
 
 const connectionPragmas = `
@@ -85,6 +92,12 @@ CREATE TABLE IF NOT EXISTS analyses (
   metrics_json TEXT NOT NULL,
   created_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS training_profiles (
+  user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  profile_json TEXT NOT NULL,
+  revision INTEGER NOT NULL DEFAULT 1,
+  updated_at TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS usage_quotas (
   user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   quota_key TEXT NOT NULL,
@@ -126,7 +139,7 @@ CREATE INDEX IF NOT EXISTS matches_user_finished ON matches(user_id, finished_at
 CREATE INDEX IF NOT EXISTS online_members_user ON online_room_members(user_id, joined_at DESC);
 `;
 
-const SUPPORTED_SCHEMA_VERSION = 3;
+const SUPPORTED_SCHEMA_VERSION = 4;
 
 function migrate(database: SqliteDatabase, version: number): void {
   if (version > SUPPORTED_SCHEMA_VERSION) throw new Error(`Database schema ${version} is newer than this server supports`);
@@ -251,9 +264,49 @@ export function listStoredGames(database: SqliteDatabase, userId: string, limit 
   return rows.flatMap(row => { try { const game = JSON.parse(row.state_json) as GameState; return game.schemaVersion === 2 && Array.isArray(game.players) && Array.isArray(game.events) ? [game] : []; } catch { return []; } });
 }
 
-export function exportUserProgress(database: SqliteDatabase, userId: string): { profile: unknown; matches: unknown[]; events: unknown[]; analyses: unknown[] } {
+function readTrainingRow(database: SqliteDatabase, userId: string): StoredTrainingProfile {
+  const row = database.prepare<{ profile_json: string; revision: number; updated_at: string }>('SELECT profile_json,revision,updated_at FROM training_profiles WHERE user_id=?').get(userId);
+  if (!row) return { profile: structuredClone(EMPTY_TRAINING_PROFILE), revision: 0, updatedAt: null };
+  try {
+    const profile = parseTrainingProfile(JSON.parse(row.profile_json));
+    return profile ? { profile, revision: row.revision, updatedAt: row.updated_at } : { profile: structuredClone(EMPTY_TRAINING_PROFILE), revision: row.revision, updatedAt: row.updated_at };
+  } catch { return { profile: structuredClone(EMPTY_TRAINING_PROFILE), revision: row.revision, updatedAt: row.updated_at }; }
+}
+
+export function getTrainingProfile(database: SqliteDatabase, userId: string): StoredTrainingProfile {
+  return readTrainingRow(database, userId);
+}
+
+export class TrainingRevisionConflictError extends Error {
+  constructor(public readonly latest: StoredTrainingProfile) { super('Training profile revision conflict'); }
+}
+
+export function saveTrainingProfile(database: SqliteDatabase, claims: SessionClaims, incoming: TrainingProfile, baseRevision?: number): StoredTrainingProfile {
+  const now = new Date().toISOString();
+  database.exec('BEGIN IMMEDIATE');
+  try {
+    const active = database.prepare(`SELECT 1 FROM sessions s JOIN users u ON u.id=s.user_id
+      WHERE s.id=? AND s.user_id=? AND s.expires_at>?`).get(claims.sid, claims.userId, now);
+    if (!active) throw new Error('Training session is no longer active');
+    const stored = readTrainingRow(database, claims.userId);
+    if (baseRevision !== undefined && baseRevision !== stored.revision) throw new TrainingRevisionConflictError(stored);
+    const profile = mergeTrainingProfiles(stored.profile, incoming), revision = stored.revision + 1;
+    database.prepare(`INSERT INTO training_profiles(user_id,profile_json,revision,updated_at) VALUES(?,?,?,?)
+      ON CONFLICT(user_id) DO UPDATE SET profile_json=excluded.profile_json,revision=excluded.revision,updated_at=excluded.updated_at`)
+      .run(claims.userId, JSON.stringify(profile), revision, now);
+    database.exec('COMMIT');
+    return { profile, revision, updatedAt: now };
+  } catch (error) {
+    database.exec('ROLLBACK');
+    throw error;
+  }
+}
+
+export function exportUserProgress(database: SqliteDatabase, userId: string): { profile: unknown; googleAccount: unknown; training: StoredTrainingProfile; matches: unknown[]; events: unknown[]; analyses: unknown[] } {
   return {
     profile: database.prepare('SELECT id,kind,display_name,created_at,updated_at FROM users WHERE id=?').get(userId) ?? null,
+    googleAccount: database.prepare('SELECT provider_subject,email,created_at,updated_at FROM google_accounts WHERE user_id=?').get(userId) ?? null,
+    training: getTrainingProfile(database, userId),
     matches: database.prepare('SELECT * FROM matches WHERE user_id=? ORDER BY finished_at').all(userId),
     events: database.prepare('SELECT e.* FROM match_events e JOIN matches m ON m.id=e.match_id WHERE m.user_id=? ORDER BY e.match_id,e.sequence').all(userId),
     analyses: database.prepare('SELECT a.* FROM analyses a JOIN matches m ON m.id=a.match_id WHERE m.user_id=? ORDER BY a.created_at').all(userId),
@@ -286,6 +339,13 @@ export function claimGoogleAccount(database: SqliteDatabase, guestUserId: string
       ON CONFLICT(provider_subject) DO UPDATE SET email=excluded.email,updated_at=excluded.updated_at`)
       .run(profile.subject, userId, email, now, now);
     if (guestUserId && guestUserId !== userId) {
+      const guestTraining = readTrainingRow(database, guestUserId), accountTraining = readTrainingRow(database, userId);
+      if (guestTraining.revision > 0) {
+        const merged = mergeTrainingProfiles(accountTraining.profile, guestTraining.profile);
+        database.prepare(`INSERT INTO training_profiles(user_id,profile_json,revision,updated_at) VALUES(?,?,?,?)
+          ON CONFLICT(user_id) DO UPDATE SET profile_json=excluded.profile_json,revision=excluded.revision,updated_at=excluded.updated_at`)
+          .run(userId, JSON.stringify(merged), Math.max(accountTraining.revision, guestTraining.revision) + 1, now);
+      }
       database.prepare('DELETE FROM matches WHERE user_id=? AND seed IN (SELECT seed FROM matches WHERE user_id=?)').run(guestUserId, userId);
       database.prepare('UPDATE matches SET user_id=? WHERE user_id=?').run(userId, guestUserId);
       database.prepare('UPDATE sessions SET user_id=? WHERE user_id=?').run(userId, guestUserId);

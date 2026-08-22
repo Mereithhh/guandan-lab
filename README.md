@@ -17,7 +17,7 @@ GuanDan Lab 是一个开源的零基础掼蛋训练器。它先用标称 15 分�
 
 ![GuanDan Lab 真实产品演示：训练入口、课程、记牌与 AI 牌桌](./public/walkthrough.gif)
 
-[确定性核心与 32 项一致性检查](./tests/unit/conformance.test.ts) · [公平 AI 的可见信息边界](./docs/ARCHITECTURE.md) · 146 项单元/契约测试 · [beta.5 安全审查记录](./docs/SECURITY_REVIEW_BETA5.md)
+[确定性核心与 32 项一致性检查](./tests/unit/conformance.test.ts) · [公平 AI 的可见信息边界](./docs/ARCHITECTURE.md) · 158 项单元/契约测试 · [beta.5 安全审查记录](./docs/SECURITY_REVIEW_BETA5.md)
 
 ## 已经可以做什么
 
@@ -30,7 +30,7 @@ GuanDan Lab 是一个开源的零基础掼蛋训练器。它先用标称 15 分�
 - 同点手牌叠放、可调 AI 节奏、最近出牌记录、一键合法提示。
 - 可安装的 Web App、搜索引擎发现文件、真实能力结构化数据和不含追踪参数的系统分享入口。
 - 基于真实双副牌 ID 的已见牌减法、位置九宫格、完整事件回放，以及牌技分与社交分分离的赛后建议。
-- 游客模式无需注册；浏览器支持且未清理 localStorage 时会保存最近完成的训练记录，自托管配置 SQLite 后可同步完整事件与分析。
+- 游客模式无需注册；浏览器支持且未清理 localStorage 时会保存训练记录，自托管配置 SQLite 后可跨设备合并课程、残局、两种记牌成绩、偏好、完整牌局事件与分析，旧设备不会把已获得进度锁回去。
 
 <details>
 <summary>查看真实界面截图</summary>
@@ -63,15 +63,15 @@ cp .env.example .env.local
 docker compose up --build
 ```
 
-默认 SQLite 数据位于 Docker 命名卷的 `/data/guandan.sqlite`。数据库启用 WAL、外键与 busy timeout，并保存游客资料、会话、完整牌局、逐手事件、分析和用量配额表。未配置 `SESSION_SECRET` 时会安全降级为纯本机存档，不会签发可伪造的生产会话。
+默认 SQLite 数据位于 Docker 命名卷的 `/data/guandan.sqlite`。数据库启用 WAL、外键与 busy timeout，并保存游客资料、会话、训练档案、完整牌局、逐手事件、分析和用量配额表。未配置 `SESSION_SECRET` 时会安全降级为纯本机存档，不会签发可伪造的生产会话。
 
 准备公开部署前运行 `docker compose run --rm --no-deps web node scripts/doctor.mjs`；本地 Node 开发也可运行 `npm run doctor`。它会检查会话、SQLite、HTTPS、OAuth、在线匹配、兼容模型、ElevenLabs 和打赏链接，只输出能力状态与修复建议，不会显示任何密钥；存在生产阻断项时以非零状态退出。
 
 公网服务器、TLS 反向代理、备份、升级与 `guandan.mereith.com` DNS 步骤见 [部署指南](./docs/DEPLOYMENT.md)。
 
-自托管数据接口支持 `GET /api/progress?export=1` 导出当前游客的数据，及 `DELETE /api/progress` 删除资料。写入和删除要求同源请求与 HttpOnly 签名会话。
+自托管数据接口支持 `GET /api/progress?export=1` 导出当前游客的数据，及 `DELETE /api/progress` 删除资料。训练档案采用有界单调合并和版本比较：版本冲突时客户端只把上次确认后新增的答题记录重放到最新云档案，课程与残局不会被较旧快照降级，满 50 条且无法判断先后的分叉快照会保留服务器历史。写入和删除要求同源请求与 HttpOnly 签名会话；保存事务会再次验证会话，确认删除时也会清除本设备训练记录，避免旧请求或本地资料恢复已删除账户。
 
-可选 Google OAuth 使用 Authorization Code + PKCE。把 `${SITE_URL}/api/auth/google/callback` 注册为回调地址，再配置 `GOOGLE_CLIENT_ID` 与 `GOOGLE_CLIENT_SECRET`；登录后会在事务中把当前游客的历史认领到 Google 资料。项目只保存 Google subject、邮箱和显示名，不保存 Google access token。
+可选 Google OAuth 使用 Authorization Code + PKCE。把 `${SITE_URL}/api/auth/google/callback` 注册为回调地址，再配置 `GOOGLE_CLIENT_ID` 与 `GOOGLE_CLIENT_SECRET`；登录后会在事务中把当前游客的训练档案与牌局历史认领到 Google 资料。项目只保存 Google subject、邮箱和显示名，不保存 Google access token。
 
 设置 `ONLINE_MATCHING_ENABLED=1` 可启用自托管四人真人匹配预览。服务端生成牌局、按乐观版本执行每个动作，并向玩家只投影自己的手牌和公开信息；浏览器每秒短轮询，因此刷新后能重新进入进行中的房间。该预览没有聊天，公网开放前仍应在反向代理层配置 TLS、连接级限流和监控。
 
