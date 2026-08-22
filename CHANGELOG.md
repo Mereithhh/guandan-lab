@@ -4,6 +4,12 @@ All notable changes will be documented here.
 
 ## Unreleased
 
+## 0.3.0-beta.8 — 2026-08-22
+
+- Added five optional deterministic 5–7 card “Chen table” endgames as a bridge from course mastery to the full 108-card deal, with immediate rules and table-manner feedback.
+- Validated every puzzle choice through the production rules engine and kept all opponent hands out of learner-facing fixtures and explanations.
+- Added versioned on-device puzzle progress, first-choice scoring, retry guidance and a full restart action.
+
 ## 0.3.0-beta.7 — 2026-08-22
 
 - Increased the exposed mobile tap step for overlapping same-rank cards to 44px while preserving visual grouping and individual selection.
