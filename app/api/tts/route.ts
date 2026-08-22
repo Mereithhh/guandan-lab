@@ -21,18 +21,21 @@ export async function POST(request: Request) {
   const cached = audioCache.get(cacheKey);
   if (cached) return new Response(cached.slice(0), { headers: { 'content-type': 'audio/mpeg', 'cache-control': 'private, max-age=3600' } });
 
-  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),5000);let response:Response;
-  try { response = await fetch(elevenLabsSpeechUrl(voiceId), {
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),5000);
+  try { const response = await fetch(elevenLabsSpeechUrl(voiceId), {
       method: 'POST', signal:controller.signal,
+      redirect: 'error',
       headers: { 'xi-api-key': apiKey, 'content-type': 'application/json', accept: 'audio/mpeg' },
       body: JSON.stringify({ text, model_id: model, output_format: 'mp3_44100_128' }),
     });
-  } catch { return Response.json({ error: '语音服务请求超时', fallback: 'browser' }, { status: 504 }); }
-  finally { clearTimeout(timer); }
-  const contentType=response.headers.get('content-type')||'';
-  if (!response.ok || !contentType.startsWith('audio/')) return Response.json({ error: '语音服务暂时不可用', fallback: 'browser' }, { status: 502 });
-  const audio=await response.arrayBuffer();
-  if(!audio.byteLength||audio.byteLength>3_000_000)return Response.json({ error: '语音响应大小异常', fallback: 'browser' }, { status: 502 });
-  if(audioCache.size>=20)audioCache.delete(audioCache.keys().next().value!);audioCache.set(cacheKey,audio);
-  return new Response(audio.slice(0), { headers: { 'content-type': 'audio/mpeg', 'cache-control': 'private, max-age=3600' } });
+    const contentType=response.headers.get('content-type')||'';
+    if (!response.ok || !contentType.startsWith('audio/')) return Response.json({ error: '语音服务暂时不可用', fallback: 'browser' }, { status: 502 });
+    const audio=await response.arrayBuffer();
+    if(!audio.byteLength||audio.byteLength>3_000_000)return Response.json({ error: '语音响应大小异常', fallback: 'browser' }, { status: 502 });
+    if(audioCache.size>=20)audioCache.delete(audioCache.keys().next().value!);audioCache.set(cacheKey,audio);
+    return new Response(audio.slice(0), { headers: { 'content-type': 'audio/mpeg', 'cache-control': 'private, max-age=3600' } });
+  } catch {
+    const timedOut=controller.signal.aborted;
+    return Response.json({ error: timedOut?'语音服务请求超时':'语音服务暂时不可用', fallback: 'browser' }, { status: timedOut?504:502 });
+  } finally { clearTimeout(timer); }
 }

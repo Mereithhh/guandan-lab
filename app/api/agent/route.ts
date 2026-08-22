@@ -33,9 +33,10 @@ export async function POST(request: Request) {
     if(raw.length>100_000)return Response.json({ error: '远程 AI 响应过大' }, { status: 502 });
     const data = JSON.parse(raw) as {choices?: Array<{message?: {content?: string}}>};
     const content = data.choices?.[0]?.message?.content;
-    if (!content) return Response.json({ error: '远程 AI 返回为空' }, { status: 502 });
+    if (typeof content !== 'string' || !content.trim()) return Response.json({ error: '远程 AI 返回为空' }, { status: 502 });
     return Response.json({ move: parseAgentMove(content, input.legalMoves) });
   } catch {
-    return Response.json({ error: '远程 AI 请求超时' }, { status: 504 });
+    const timedOut=controller.signal.aborted;
+    return Response.json({ error: timedOut?'远程 AI 请求超时':'远程 AI 响应无效' }, { status: timedOut?504:502 });
   } finally { clearTimeout(timer); }
 }

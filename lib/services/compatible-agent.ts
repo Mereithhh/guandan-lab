@@ -39,6 +39,9 @@ export function parseAgentMove(content: string, legalMoves: string[][]): string[
   const move = (value as {move?: unknown})?.move;
   if (move === null) return null;
   if (!Array.isArray(move) || move.some(id => typeof id !== 'string')) return null;
-  const key = [...move].sort().join('|');
-  return legalMoves.some(candidate => [...candidate].sort().join('|') === key) ? move as string[] : null;
+  const selected = [...move].sort();
+  return legalMoves.some(candidate => {
+    const legal = [...candidate].sort();
+    return legal.length === selected.length && legal.every((id, index) => id === selected[index]);
+  }) ? move as string[] : null;
 }

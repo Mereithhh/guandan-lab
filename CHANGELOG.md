@@ -4,6 +4,13 @@ All notable changes will be documented here.
 
 ## Unreleased
 
+## 0.3.0-beta.5 — 2026-08-22
+
+- Added a typed Chinese/English onboarding layer for the home page, mastery course and full rulebook, with a keyboard-accessible persisted language switch.
+- Added 32 competition-rule conformance checks (30 table-driven fixtures, one response-right scenario and one provenance check) covering wildcards, sequences, bombs and tribute/return edges.
+- Added route-level compatible Agent and ElevenLabs contracts for authentication, timeouts, malformed upstreams, redirect safety, audio validation and secret redaction.
+- Hardened Agent card-ID comparison and made TTS download failures fall back safely to browser speech.
+
 ## 0.3.0-beta.4 — 2026-08-22
 
 - Replaced misleading duplicate time tracks with distinct course, memory and mastery-gated full-game entrances.
