@@ -44,3 +44,21 @@ html:not([data-hydrated="true"]) button{pointer-events:none}
 .playing-card.wild-card{border-color:#f59e0b;box-shadow:0 0 0 2px #fde68a,2px 3px 0 rgb(0 0 0 / 35%)}
 .wild-badge{position:absolute;right:2px;top:2px;border:1px solid #7c2d12;background:#fbbf24;padding:1px 2px;color:#7c2d12;font-size:8px;line-height:1;font-weight:900}
 .replay-evidence{margin-top:10px;color:#64748b;font-size:10px}.replay-evidence summary{cursor:pointer;font-weight:900}.replay-evidence code{display:block;margin-top:5px;overflow-wrap:anywhere}
+
+/* Physical hand: same ranks form upright vertical piles; rank piles scroll sideways. */
+.hand.grouped-hand{align-items:flex-end;padding-top:8px}
+.hand.grouped-hand .rank-group{display:flex;height:210px;min-width:52px;flex-direction:column;justify-content:flex-end}
+.hand.grouped-hand .rank-group .playing-card{margin-top:-58px;margin-left:0}
+.hand.grouped-hand .rank-group .playing-card:first-child{margin-top:0}
+.hand.grouped-hand .rank-group .playing-card:not(:last-of-type){clip-path:inset(0 0 58px 0)}
+.hand.grouped-hand .rank-group .playing-card:hover{transform:translateX(8px)}
+.hand.grouped-hand .rank-group .playing-card.selected{z-index:0;transform:translateX(28px)}
+.hand.grouped-hand .rank-count{right:-7px;top:auto;bottom:62px}
+.opponent .avatar-boss{background-image:url('/chen-avatar-v2.png');background-position:center 18%;background-size:cover}
+.opponent .avatar{width:48px;height:48px}
+.memory-method-note,.memory-source-note{margin-top:10px;color:#64748b;font-size:10px;line-height:1.6}
+.opening-hand{display:flex;margin-top:14px;overflow-x:auto;padding:8px 4px 12px}.opening-hand .playing-card{flex:0 0 auto;margin-left:-8px}.opening-hand .playing-card:first-child{margin-left:0}
+.memory-source-note a{text-decoration:underline}
+.memory-tile{align-content:center;gap:3px}.memory-tile b{font-size:11px}.memory-tile strong{font-size:26px}.memory-tile small{color:#64748b;font-size:8px}.memory-tile.correct{background:#bbf7d0}.memory-tile.wrong{background:#fecaca}
+.nine-grid-plays{display:grid;gap:8px;margin:14px 0}.nine-grid-plays>div{display:flex;align-items:center;gap:10px;border:1px dashed #94a3b8;padding:6px}.nine-grid-plays>div>span{min-width:48px;font-size:9px;font-weight:900}.nine-grid-plays .played-cards{justify-content:flex-start;overflow-x:auto}
+@media(max-width:767px){.hand.grouped-hand .rank-group{height:190px;min-width:47px}.hand.grouped-hand .rank-group .playing-card{margin-top:-52px;margin-left:0}.hand.grouped-hand .rank-group .playing-card:not(:last-of-type){clip-path:inset(0 0 52px 0)}.hand.grouped-hand .rank-count{bottom:58px}.opponent .avatar{width:44px;height:44px}.memory-tile strong{font-size:22px}.nine-grid-plays>div{align-items:flex-start;flex-direction:column}}

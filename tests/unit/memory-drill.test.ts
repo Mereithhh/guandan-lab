@@ -1,39 +1,176 @@
-import { describe,expect,it } from 'vitest';
-import { createDeck } from '../../lib/game/cards';
-import { createCountDrill,parseCountAttempts,parseGridAttempts,serializeCountAttempts,serializeGridAttempts,type CountAttempt } from '../../lib/services/memory-drill';
+import { describe, expect, it } from "vitest";
+import { createDeck } from "../../lib/game/cards";
+import {
+  createCountDrill,
+  createNineGridDrill,
+  parseCountAttempts,
+  parseGridAttempts,
+  serializeCountAttempts,
+  serializeGridAttempts,
+  type CountAttempt,
+} from "../../lib/services/memory-drill";
 
-describe('live-event subtraction drill',()=>{
-  it('uses unique real deck IDs and derives the remaining count exactly',()=>{
-    const ids=new Set(createDeck().map(card=>card.id));
-    for(let round=1;round<=12;round++){
-      const drill=createCountDrill(20260822,round),cards=drill.plays.flat(),seen=cards.filter(card=>drill.kind==='jokers'?card.rank>=15:drill.kind==='ace'?card.rank===14:drill.kind==='two'?card.rank===2:card.rank===drill.level).length;
-      expect(cards.every(card=>ids.has(card.id))).toBe(true);expect(new Set(cards.map(card=>card.id)).size).toBe(cards.length);expect(seen).toBe(drill.seen);expect(drill.total-drill.seen).toBe(drill.remaining);expect(drill.options).toContain(drill.remaining);
+describe("live-event subtraction drill", () => {
+  it("uses unique real deck IDs and derives the remaining count exactly", () => {
+    const ids = new Set(createDeck().map((card) => card.id));
+    for (let round = 1; round <= 12; round++) {
+      const drill = createCountDrill(20260822, round),
+        cards = drill.plays.flat(),
+        seen = cards.filter((card) =>
+          drill.kind === "jokers"
+            ? card.rank >= 15
+            : drill.kind === "ace"
+              ? card.rank === 14
+              : drill.kind === "two"
+                ? card.rank === 2
+                : card.rank === drill.level,
+        ).length;
+      expect(cards.every((card) => ids.has(card.id))).toBe(true);
+      expect(new Set(cards.map((card) => card.id)).size).toBe(cards.length);
+      expect(seen).toBe(drill.seen);
+      expect(drill.total - drill.seen).toBe(drill.remaining);
+      expect(drill.options).toContain(drill.remaining);
     }
   });
 
-  it('repeats a missed category with a new valid sequence',()=>{
-    const first=createCountDrill(7,1,'jokers'),retry=createCountDrill(7,2,'jokers');
-    expect(first.kind).toBe('jokers');expect(retry.kind).toBe('jokers');expect(retry.plays.flat().map(card=>card.id)).not.toEqual(first.plays.flat().map(card=>card.id));
+  it("repeats a missed category with a new valid sequence", () => {
+    const first = createCountDrill(7, 1, "jokers"),
+      retry = createCountDrill(7, 2, "jokers");
+    expect(first.kind).toBe("jokers");
+    expect(retry.kind).toBe("jokers");
+    expect(retry.plays.flat().map((card) => card.id)).not.toEqual(
+      first.plays.flat().map((card) => card.id),
+    );
   });
 
-  it('trains every legal non-joker level from 2 through A',()=>{
-    const levels=new Set(Array.from({length:13},(_,index)=>createCountDrill(0,index+1,'level').level));
-    expect([...levels].sort((a,b)=>a-b)).toEqual([2,3,4,5,6,7,8,9,10,11,12,13,14]);
+  it("trains every legal non-joker level from 2 through A", () => {
+    const levels = new Set(
+      Array.from(
+        { length: 13 },
+        (_, index) => createCountDrill(0, index + 1, "level").level,
+      ),
+    );
+    expect([...levels].sort((a, b) => a - b)).toEqual([
+      2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+    ]);
   });
 
-  it('stores only bounded, versioned attempt evidence',()=>{
-    const attempt:CountAttempt={round:1,kind:'level',seen:2,remaining:6,answer:6,correct:true};
-    expect(parseCountAttempts(serializeCountAttempts([attempt]))).toEqual([attempt]);
-    expect(parseCountAttempts('{"schemaVersion":0,"attempts":[]}')).toEqual([]);expect(parseCountAttempts('broken')).toEqual([]);
-    expect(parseCountAttempts(JSON.stringify({schemaVersion:1,attempts:[{...attempt,remaining:99},null]}))).toEqual([]);
-    expect(parseCountAttempts(JSON.stringify({schemaVersion:1,attempts:[{...attempt,answer:5,correct:true}]}))).toEqual([]);
+  it("stores only bounded, versioned attempt evidence", () => {
+    const attempt: CountAttempt = {
+      round: 1,
+      kind: "level",
+      seen: 2,
+      remaining: 6,
+      answer: 6,
+      correct: true,
+    };
+    expect(parseCountAttempts(serializeCountAttempts([attempt]))).toEqual([
+      attempt,
+    ]);
+    expect(parseCountAttempts('{"schemaVersion":0,"attempts":[]}')).toEqual([]);
+    expect(parseCountAttempts("broken")).toEqual([]);
+    expect(
+      parseCountAttempts(
+        JSON.stringify({
+          schemaVersion: 1,
+          attempts: [{ ...attempt, remaining: 99 }, null],
+        }),
+      ),
+    ).toEqual([]);
+    expect(
+      parseCountAttempts(
+        JSON.stringify({
+          schemaVersion: 1,
+          attempts: [{ ...attempt, answer: 5, correct: true }],
+        }),
+      ),
+    ).toEqual([]);
   });
 
-  it('bounds and validates legacy nine-grid attempt history',()=>{
-    const attempts=Array.from({length:60},(_,index)=>({round:index+1,score:index%4}));
-    expect(parseGridAttempts(serializeGridAttempts(attempts))).toEqual(attempts.slice(-50));
-    expect(parseGridAttempts(JSON.stringify([{round:'oops',score:99},{round:2,score:3}]))).toEqual([{round:2,score:3}]);
-    expect(parseGridAttempts(JSON.stringify({schemaVersion:0,attempts:[{round:2,score:3}]}))).toEqual([]);
-    expect(parseGridAttempts('broken')).toEqual([]);
+  it("bounds and validates legacy nine-grid attempt history", () => {
+    const attempts = Array.from({ length: 60 }, (_, index) => ({
+      round: index + 1,
+      score: index % 10,
+      maxScore: 9 as const,
+    }));
+    expect(parseGridAttempts(serializeGridAttempts(attempts))).toEqual(
+      attempts.slice(-50),
+    );
+    expect(
+      parseGridAttempts(
+        JSON.stringify([
+          { round: "oops", score: 99 },
+          { round: 2, score: 3 },
+        ]),
+      ),
+    ).toEqual([{ round: 2, score: 3 }]);
+    expect(
+      parseGridAttempts(
+        JSON.stringify({
+          schemaVersion: 0,
+          attempts: [{ round: 2, score: 3 }],
+        }),
+      ),
+    ).toEqual([]);
+    expect(parseGridAttempts("broken")).toEqual([]);
+    expect(
+      parseGridAttempts(
+        JSON.stringify([{ round: 3, score: 18, maxScore: 18 }]),
+      ),
+    ).toEqual([{ round: 3, score: 18, maxScore: 18 }]);
+  });
+
+  it("builds the popular nine-cell remaining-count drill from one real deck", () => {
+    const expected = [
+      [
+        "bigJoker",
+        "大王",
+        2,
+        (c: { rank: number; suit: string }) => c.rank === 16,
+      ],
+      [
+        "smallJoker",
+        "小王",
+        2,
+        (c: { rank: number; suit: string }) => c.rank === 15,
+      ],
+      [
+        "heartLevel",
+        "红桃级牌",
+        2,
+        (c: { rank: number; suit: string }) => c.rank === 2 && c.suit === "H",
+      ],
+      ["ace", "A", 8, (c: { rank: number; suit: string }) => c.rank === 14],
+      [
+        "plainLevel",
+        "普通级牌",
+        6,
+        (c: { rank: number; suit: string }) => c.rank === 2 && c.suit !== "H",
+      ],
+      ["king", "K", 8, (c: { rank: number; suit: string }) => c.rank === 13],
+      ["five", "5", 8, (c: { rank: number; suit: string }) => c.rank === 5],
+      ["ten", "10", 8, (c: { rank: number; suit: string }) => c.rank === 10],
+      ["queen", "Q", 8, (c: { rank: number; suit: string }) => c.rank === 12],
+    ] as const;
+    for (const seed of [1, 77, 20260822]) {
+      const drill = createNineGridDrill(seed, 1),
+        seenCards = drill.plays.flat(),
+        all = [...drill.hand, ...seenCards];
+      expect(drill.level).toBe(2);
+      expect(
+        drill.cells.map((cell) => [cell.key, cell.label, cell.total]),
+      ).toEqual(expected.map(([key, label, total]) => [key, label, total]));
+      expect(new Set(all.map((card) => card.id)).size).toBe(all.length);
+      drill.cells.forEach((cell, index) => {
+        const matches = expected[index][3],
+          own = drill.hand.filter(matches).length,
+          seen = seenCards.filter(matches).length;
+        expect(cell.own).toBe(own);
+        expect(cell.seen).toBe(seen);
+        expect(cell.initial).toBe(cell.total - own);
+        expect(cell.remaining).toBe(cell.total - own - seen);
+        expect(cell.remaining).toBeGreaterThanOrEqual(0);
+      });
+    }
   });
 });
