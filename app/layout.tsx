@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   icons:{icon:[{url:'/favicon.svg',type:'image/svg+xml'},{url:'/icon-192.png',sizes:'192x192',type:'image/png'}],apple:'/icon-192.png'},
   manifest:'/manifest.webmanifest',
   alternates: { canonical: '/' },
-  openGraph: { type:'website',title: 'GuanDan Lab · 掼蛋实验室', description: '不是教你赢老板，是教你成为大家愿意再约的搭档。', url: '/', siteName: 'GuanDan Lab', locale: 'zh_CN', images: [{url:'/og.png',width:1200,height:630,alt:'GuanDan Lab 掼蛋实验室'}] },
+  openGraph: { type:'website',title: 'GuanDan Lab · 掼蛋实验室', description: '15 分钟入门掼蛋：AI 陪练、九宫格记牌、逐手复盘。快速会打，体面上桌。', url: '/', siteName: 'GuanDan Lab', locale: 'zh_CN', images: [{url:'/og.png',width:1200,height:630,alt:'GuanDan Lab 掼蛋实验室'}] },
   twitter: { card: 'summary_large_image', title: 'GuanDan Lab · 掼蛋实验室', description: '关键回合有提示 · 每局有证据复盘', images: ['/og.png'] },
   appleWebApp:{capable:true,title:'GuanDan Lab',statusBarStyle:'black-translucent'},
 };

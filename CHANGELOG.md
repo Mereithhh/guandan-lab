@@ -4,6 +4,11 @@ All notable changes will be documented here.
 
 ## Unreleased
 
+## 0.3.0-beta.20 — 2026-08-22
+
+- Removed the over-explained “win the boss” tagline from the README and social metadata.
+- Reframed the Chinese launch copy around the familiar “饭前不掼蛋，等于没吃饭” hook while keeping the product slogan concise.
+
 ## 0.3.0-beta.19 — 2026-08-22
 
 - Renamed the table host from Chen to Wang across the course, complete matches, replays, Agent prompts and project copy without adding an artificial character disclaimer to the interface.

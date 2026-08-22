@@ -1,6 +1,6 @@
 # GuanDan Lab · 掼蛋实验室
 
-> 快速会打，体面上桌。不是教你赢老板，是教你成为大家愿意再约的搭档。
+> 快速会打，体面上桌。
 
 [English README](./README_EN.md)
 
