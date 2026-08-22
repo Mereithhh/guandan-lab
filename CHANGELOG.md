@@ -4,6 +4,10 @@ All notable changes will be documented here.
 
 ## Unreleased
 
+## 0.3.0-beta.22 — 2026-08-22
+
+- Renamed the direct live-lobby entry to “在线匹配” / “Match online” so it no longer suggests a foundation-course gate.
+
 ## 0.3.0-beta.21 — 2026-08-22
 
 - Made `guandan.mereith.com` the only public Demo URL in open-source, deployment and launch materials.
