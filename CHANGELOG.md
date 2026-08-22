@@ -4,6 +4,13 @@ All notable changes will be documented here.
 
 ## Unreleased
 
+## 0.3.0-beta.4 — 2026-08-22
+
+- Replaced misleading duplicate time tracks with distinct course, memory and mastery-gated full-game entrances.
+- Fixed Docker Compose environment propagation and added a real Compose capability smoke test.
+- Added explicit local/compatible Agent and device/ElevenLabs voice status without exposing configuration secrets.
+- Added an original four-panel course illustration plus real homepage, course, memory and AI-table screenshots and a lightweight walkthrough GIF.
+
 ## 0.3.0-beta.3 — 2026-08-22
 
 - Added an exposed-card subtraction drill generated from real two-deck card IDs, with remedial category repetition, separate accuracy history and a preserved nine-grid mode.

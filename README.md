@@ -6,7 +6,7 @@
 
 GuanDan Lab 是一个开源的零基础掼蛋训练器。它把确定性的竞技规则引擎、不会偷看牌的 AI 陪练、记牌训练和逐手复盘放在同一个 15 分钟学习路径里。默认场景是陪虚构角色“陈总”上桌：目标是节奏舒服、配合清楚、牌品可靠，而不是故意输牌或暗示牌情。
 
-![GuanDan Lab 像素风牌桌宣传插画](./public/launch-poster.png)
+![GuanDan Lab 真实产品演示：训练入口、课程、记牌与 AI 牌桌](./public/walkthrough.gif)
 
 ## 已经可以做什么
 
@@ -17,6 +17,15 @@ GuanDan Lab 是一个开源的零基础掼蛋训练器。它把确定性的竞�
 - 同点手牌叠放、可调 AI 节奏、最近出牌记录、一键合法提示。
 - 基于真实双副牌 ID 的已见牌减法、位置九宫格、完整事件回放，以及牌技分与社交分分离的赛后建议。
 - 游客模式无需注册；浏览器始终保留最近训练记录，自托管配置 SQLite 后会同步完整事件与分析。
+
+<details>
+<summary>查看真实界面截图</summary>
+
+![15 分钟 mastery 课程](./public/screenshots/course.png)
+![已见牌减法训练](./public/screenshots/memory.png)
+![带慢速节奏、出牌历史与同点叠牌的 AI 牌桌](./public/screenshots/game.png)
+
+</details>
 
 ## 快速启动
 
@@ -69,6 +78,13 @@ SUPPORT_URL=https://your-public-payment-link.example
 ```
 
 `AI_BASE_URL` 默认必须是公网 HTTPS 地址，并固定请求 `/chat/completions`。只有在明确知道风险的本地自托管环境中，才能设置 `AI_ALLOW_PRIVATE_BASE_URL=1` 访问局域网模型。
+
+页面底部会显示当前能力模式：`本地规则 / 设备语音`，或在完整安全配置后显示 `兼容大模型优先 / ElevenLabs 优先`。这里的“优先”表示远程服务异常时仍会自动回退，所有大模型动作依然必须经过本地规则校验。可用下面的无密钥自检确认服务端实际识别到的模式：
+
+```bash
+curl -s http://localhost:3000/api/session
+# 查看 agentProvider 与 voiceProvider；响应不会包含 Base URL、模型名或密钥。
+```
 
 当前匿名限流只适合单实例自托管试用。公开站点在 SQLite/平台级持久配额、日预算和熔断完成前，不应配置可产生费用的生产密钥。
 

@@ -25,7 +25,7 @@ jobs:
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
-      - run: docker build -t guandan-lab:ci .
+      - run: docker build -t guandan-lab:local .
       - name: Smoke-test persistent read-only container
         run: |
           cleanup() {
@@ -37,7 +37,7 @@ jobs:
           docker volume create guandan-lab-ci-data >/dev/null
           docker run -d --name guandan-lab-ci --read-only --tmpfs /tmp -v guandan-lab-ci-data:/data \
             -e DATABASE_PATH=/data/ci.sqlite -e SESSION_SECRET=ci-session-secret-with-more-than-32-characters \
-            -p 127.0.0.1:3000:3000 guandan-lab:ci
+            -p 127.0.0.1:3000:3000 guandan-lab:local
           ready=0
           for attempt in {1..30}; do
             if curl --fail --silent --show-error http://127.0.0.1:3000/ >/dev/null; then
@@ -53,3 +53,27 @@ jobs:
           test "$(docker inspect --format='{{.Config.User}}' guandan-lab-ci)" = node
           test "$(docker inspect --format='{{.HostConfig.ReadonlyRootfs}}' guandan-lab-ci)" = true
           curl --fail --silent --show-error http://127.0.0.1:3000/api/session | grep '"persistent":true'
+      - name: Smoke-test Compose env file
+        run: |
+          cp .env.example .env.local
+          sed -i 's/^SESSION_SECRET=.*/SESSION_SECRET=ci-compose-secret-with-more-than-32-characters/' .env.local
+          sed -i 's/^GOOGLE_CLIENT_ID=.*/GOOGLE_CLIENT_ID=ci-client/' .env.local
+          sed -i 's/^GOOGLE_CLIENT_SECRET=.*/GOOGLE_CLIENT_SECRET=ci-secret/' .env.local
+          sed -i 's/^ONLINE_MATCHING_ENABLED=.*/ONLINE_MATCHING_ENABLED=1/' .env.local
+          cleanup() {
+            docker compose -p guandan-ci down -v >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          docker compose -p guandan-ci up -d --no-build
+          ready=0
+          for attempt in {1..30}; do
+            response="$(curl --fail --silent --show-error http://127.0.0.1:3000/api/session || true)"
+            if echo "$response" | grep -q '"persistent":true'; then
+              echo "$response" | grep '"googleOAuth":true'
+              echo "$response" | grep '"onlineMatching":true'
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          test "$ready" = 1
