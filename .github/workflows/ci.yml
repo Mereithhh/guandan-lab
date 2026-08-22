@@ -28,10 +28,23 @@ jobs:
       - run: docker build -t guandan-lab:ci .
       - name: Smoke-test the read-only container
         run: |
+          cleanup() {
+            docker logs guandan-lab-ci 2>&1 || true
+            docker rm -f guandan-lab-ci >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
           docker run -d --name guandan-lab-ci --read-only --tmpfs /tmp -p 127.0.0.1:3000:3000 guandan-lab:ci
           ready=0
-          for attempt in {1..20}; do curl --fail http://127.0.0.1:3000/ && ready=1 && break; sleep 1; done
+          for attempt in {1..30}; do
+            if curl --fail --silent --show-error http://127.0.0.1:3000/ >/dev/null; then
+              ready=1
+              break
+            fi
+            if [ "$(docker inspect --format='{{.State.Running}}' guandan-lab-ci)" != "true" ]; then
+              break
+            fi
+            sleep 1
+          done
           test "$ready" = 1
           test "$(docker inspect --format='{{.Config.User}}' guandan-lab-ci)" = node
           test "$(docker inspect --format='{{.HostConfig.ReadonlyRootfs}}' guandan-lab-ci)" = true
-          docker rm -f guandan-lab-ci

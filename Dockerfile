@@ -8,7 +8,11 @@ COPY . .
 RUN npm run build
 
 FROM node:22-bookworm-slim AS runtime
-ENV NODE_ENV=production PORT=3000
+ENV NODE_ENV=production \
+    PORT=3000 \
+    HOME=/tmp \
+    XDG_CACHE_HOME=/tmp \
+    TMPDIR=/tmp
 WORKDIR /app
 COPY --from=build --chown=node:node /app/dist/standalone ./
 USER node
