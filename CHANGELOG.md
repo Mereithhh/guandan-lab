@@ -4,6 +4,11 @@ All notable changes will be documented here.
 
 ## Unreleased
 
+## 0.3.0-beta.7 — 2026-08-22
+
+- Increased the exposed mobile tap step for overlapping same-rank cards to 44px while preserving visual grouping and individual selection.
+- Updated GitHub Actions to the latest verified major and ignored incompatible automatic major updates for TypeScript, ESLint and Node types while preserving Dependabot security updates.
+
 ## 0.3.0-beta.6 — 2026-08-22
 
 - Slowed the default AI table pace to 2.2 seconds, added a 3.5-second explanation pace, and remembers the player's choice on the device.

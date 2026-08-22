@@ -9,6 +9,18 @@ updates:
         dependency-type: production
       development:
         dependency-type: development
+    # Keep automatic majors aligned with the supported Node 22 / TypeScript 5 / ESLint 9 toolchain.
+    # Dependabot security updates remain enabled; major migrations are tracked manually.
+    ignore:
+      - dependency-name: typescript
+        update-types:
+          - version-update:semver-major
+      - dependency-name: eslint
+        update-types:
+          - version-update:semver-major
+      - dependency-name: "@types/node"
+        update-types:
+          - version-update:semver-major
   - package-ecosystem: github-actions
     directory: /
     schedule:
