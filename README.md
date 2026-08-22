@@ -9,7 +9,7 @@
 [![License](https://img.shields.io/github/license/Mereithhh/guandan-lab)](./LICENSE)
 [![Try the public demo](https://img.shields.io/badge/demo-play_now-57e3bd)](https://guandan-bootcamp.miromind-0889.chatgpt.site)
 
-[▶ 在线体验](https://guandan-bootcamp.miromind-0889.chatgpt.site) · [☆ Star 项目](https://github.com/Mereithhh/guandan-lab/stargazers) · [⌘ 本机运行](#快速启动)
+[▶ 在线体验](https://guandan-bootcamp.miromind-0889.chatgpt.site) · [☆ Star 项目](https://github.com/Mereithhh/guandan-lab) · [⌘ 本机运行](#快速启动)
 
 [在线体验](https://guandan-bootcamp.miromind-0889.chatgpt.site) · [部署指南](./docs/DEPLOYMENT.md) · [路线图](./ROADMAP.md) · [Launch Kit](./docs/LAUNCH_KIT.md) · [素材授权](./docs/ASSETS.md) · [隐私说明](./PRIVACY.md) · [参与贡献](./CONTRIBUTING.md)
 
@@ -134,7 +134,6 @@ npm run test:e2e
 
 ## 传播与伦理
 
-- “投资人都爱掼蛋”不是产品承诺；我们只讨论有限信息、搭档协作与牌权管理这些可验证的训练价值。
 - 不奖励喂牌、串通、偷看隐藏信息或故意输牌。
 - “陈总”是虚构训练角色，不影射任何真实个人。
 - 牌技有输赢，牌品没有捷径。
