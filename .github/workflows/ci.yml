@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run test:coverage
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - run: docker build -t guandan-lab:ci .
+      - name: Smoke-test the read-only container
+        run: |
+          docker run -d --name guandan-lab-ci --read-only --tmpfs /tmp -p 127.0.0.1:3000:3000 guandan-lab:ci
+          ready=0
+          for attempt in {1..20}; do curl --fail http://127.0.0.1:3000/ && ready=1 && break; sleep 1; done
+          test "$ready" = 1
+          test "$(docker inspect --format='{{.Config.User}}' guandan-lab-ci)" = node
+          test "$(docker inspect --format='{{.HostConfig.ReadonlyRootfs}}' guandan-lab-ci)" = true
+          docker rm -f guandan-lab-ci

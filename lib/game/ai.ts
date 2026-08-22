@@ -35,3 +35,11 @@ export async function safeAgentMove(policy:AgentPolicy,o:Observation,timeoutMs=1
 }
 
 export const localTrainingAgent:AgentPolicy={name:'搭档协作 Agent v1',choose:async(o)=>chooseAiMove(o)};
+
+export const compatibleRemoteAgent:AgentPolicy={name:'OpenAI 兼容 Agent',choose:async(observation,moves)=>{
+  const response=await fetch('/api/agent',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({observation,legalMoves:moves})});
+  if(!response.ok)throw new Error('remote agent unavailable');
+  const data=await response.json() as {move?:string[]|null};
+  if(!Object.hasOwn(data,'move')||(data.move!==null&&!Array.isArray(data.move)))throw new Error('invalid remote agent response');
+  return data.move;
+}};

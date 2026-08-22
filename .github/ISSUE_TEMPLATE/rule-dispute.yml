@@ -1,0 +1,17 @@
+name: Rule question or dispute
+description: Propose a correction or documented regional variant
+title: "[Rules] "
+labels: [rules]
+body:
+  - type: input
+    attributes: { label: Rule version or region, placeholder: 2022 competitive rules / Jiangsu local variant }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Minimal card example, description: List level, lead, response and expected result. }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Expected ruling and source, description: Link or cite an authoritative source and section. }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Current behavior }
+    validations: { required: true }

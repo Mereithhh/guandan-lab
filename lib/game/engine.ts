@@ -6,7 +6,7 @@ const nextSeat=(state:GameState,from:Seat):Seat=>{for(let i=1;i<=4;i++){const s=
 const event=(state:GameState,type:GameEvent['type'],seat?:Seat,cardIds?:string[],note?:string):GameEvent=>({id:`e${state.events.length+1}`,type,seat,cardIds,at:state.events.length,note});
 
 export function newGame(seed=Date.now(),level:Rank=2):GameState{
-  const deck=shuffle(createDeck(),seed),names=['你','周总','小顾','林姐'],roles=['you','boss','partner','opponent'] as const;
+  const deck=shuffle(createDeck(),seed),names=['你','陈总','小顾','林姐'],roles=['you','boss','partner','opponent'] as const;
   const players=names.map((name,seat)=>({seat:seat as Seat,name,role:roles[seat],hand:sortCards(deck.slice(seat*27,seat*27+27),level)}));
   const first=(Math.abs(seed)%4) as Seat;
   return{schemaVersion:2,ruleVersion:'竞技掼蛋2022-教学版',seed,createdAt:Date.now(),level,levelOwner:null,phase:'playing',players,turn:first,leader:first,lastPlay:null,passes:0,finishOrder:[],events:[{id:'e1',type:'deal',at:0,note:`seed:${seed};首出:${first}`}],trickNo:1,roundNo:1,teamLevels:[level,level],matchWinner:null};

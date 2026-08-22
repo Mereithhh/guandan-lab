@@ -1,0 +1,14 @@
+name: Feature proposal
+description: Suggest a focused product or developer improvement
+title: "[Feature] "
+labels: [enhancement]
+body:
+  - type: textarea
+    attributes: { label: User problem, description: Who is blocked and in what situation? }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Proposed outcome, description: Describe behavior, not only implementation. }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Acceptance checks, description: How can a reviewer prove it works? }
+    validations: { required: true }
