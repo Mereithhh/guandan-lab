@@ -46,6 +46,7 @@ GuanDan Lab turns those gaps into one verifiable training loop:
 - Chinese and English onboarding, mastery course and rulebook with a persisted keyboard-accessible language switch.
 - Five deterministic mini endgames whose candidate actions are checked by the production rules engine, with no opponent hands exposed.
 - Same-rank hand stacks, adjustable AI pacing, expandable live play history and one-click legal hints.
+- Installable Web App metadata, search discovery files, truthful structured data and a system share action without tracking parameters.
 - Event-based card-counting, a nine-grid memory drill and complete local match replays.
 - Guest-first use with no registration. When localStorage is available and retained, the browser saves recently completed training; optional SQLite persistence, Google OAuth progress claiming and four-player server-authoritative matchmaking are available for self-hosting.
 - Docker deployment with a named SQLite volume and capability smoke tests in CI.

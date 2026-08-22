@@ -4,6 +4,12 @@ All notable changes will be documented here.
 
 ## Unreleased
 
+## 0.3.0-beta.13 — 2026-08-22
+
+- Added a bilingual system-share action with a clipboard fallback and no referral or tracking parameters.
+- Added installable Web App metadata, 192/512 icons, `robots.txt`, `sitemap.xml` and canonical structured data for search and social discovery.
+- Added desktop/mobile browser contracts for manifest assets, indexing boundaries, structured claims and the exact shared URL.
+
 ## 0.3.0-beta.12 — 2026-08-22
 
 - Added `npm run doctor`, a secret-safe production readiness check for HTTPS, signed sessions, SQLite, Google OAuth, online matching, compatible-model Agents, ElevenLabs and support links.
