@@ -40,12 +40,16 @@ export function readCookie(cookieHeader: string | null, name: string): string | 
 }
 
 export async function signSession(claims: SessionClaims, secret: string): Promise<string> {
-  const payload = encodeBase64Url(new TextEncoder().encode(JSON.stringify(claims)));
+  return signOpaquePayload(claims, secret);
+}
+
+export async function signOpaquePayload(payloadValue: unknown, secret: string): Promise<string> {
+  const payload = encodeBase64Url(new TextEncoder().encode(JSON.stringify(payloadValue)));
   const signature = new Uint8Array(await crypto.subtle.sign('HMAC', await hmacKey(secret), new TextEncoder().encode(payload)));
   return `${payload}.${encodeBase64Url(signature)}`;
 }
 
-export async function verifySession(token: string | null, secret: string, now = Date.now()): Promise<SessionClaims | null> {
+export async function verifyOpaquePayload<T>(token: string | null, secret: string): Promise<T | null> {
   if (!token || secret.length < 24) return null;
   const [payload, encodedSignature, extra] = token.split('.');
   const signature = encodedSignature ? decodeBase64Url(encodedSignature) : null;
@@ -53,23 +57,30 @@ export async function verifySession(token: string | null, secret: string, now = 
   if (!payload || extra || !signature || !payloadBytes) return null;
   const valid = await crypto.subtle.verify('HMAC', await hmacKey(secret), Uint8Array.from(signature).buffer, new TextEncoder().encode(payload));
   if (!valid) return null;
-  try {
-    const claims = JSON.parse(new TextDecoder().decode(payloadBytes)) as SessionClaims;
-    if (claims.v !== 1 || !claims.sid || !claims.userId || !['guest', 'google'].includes(claims.kind) || typeof claims.displayName !== 'string' || claims.exp * 1000 <= now) return null;
-    return claims;
-  } catch { return null; }
+  try { return JSON.parse(new TextDecoder().decode(payloadBytes)) as T; } catch { return null; }
+}
+
+export async function verifySession(token: string | null, secret: string, now = Date.now()): Promise<SessionClaims | null> {
+  const claims = await verifyOpaquePayload<SessionClaims>(token, secret);
+  if (!claims || claims.v !== 1 || !claims.sid || !claims.userId || !['guest', 'google'].includes(claims.kind) || typeof claims.displayName !== 'string' || claims.exp * 1000 <= now) return null;
+  return claims;
 }
 
 export async function createGuestSession(secret: string, now = Date.now()): Promise<{ claims: SessionClaims; token: string }> {
   if (secret.length < 24) throw new Error('SESSION_SECRET must contain at least 24 characters');
   const suffix = crypto.randomUUID().replaceAll('-', '').slice(-6).toUpperCase();
+  return createAuthenticatedSession(secret, { userId: crypto.randomUUID(), kind: 'guest', displayName: `游客-${suffix}` }, now);
+}
+
+export async function createAuthenticatedSession(secret: string, profile: Pick<SessionClaims, 'userId' | 'kind' | 'displayName'>, now = Date.now()): Promise<{ claims: SessionClaims; token: string }> {
+  if (secret.length < 24) throw new Error('SESSION_SECRET must contain at least 24 characters');
   const issuedAt = Math.floor(now / 1000);
   const claims: SessionClaims = {
     v: 1,
     sid: crypto.randomUUID(),
-    userId: crypto.randomUUID(),
-    kind: 'guest',
-    displayName: `游客-${suffix}`,
+    userId: profile.userId,
+    kind: profile.kind,
+    displayName: profile.displayName.slice(0, 80),
     iat: issuedAt,
     exp: issuedAt + SESSION_TTL_SECONDS,
   };

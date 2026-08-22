@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { newGame } from '../../lib/game/engine';
-import { deleteUserProgress, exportUserProgress, listMatchSummaries, openProgressDatabase, resetProgressDatabaseForTests, saveCompletedMatch, upsertSession } from '../../lib/services/progress-store';
+import { claimGoogleAccount, deleteUserProgress, exportUserProgress, listMatchSummaries, openProgressDatabase, resetProgressDatabaseForTests, saveCompletedMatch, upsertSession } from '../../lib/services/progress-store';
 import { createGuestSession, expiredSessionCookie, readCookie, SESSION_COOKIE, sessionCookie, signSession, verifySession } from '../../lib/services/session';
 
 const secret = 'unit-test-session-secret-with-32-characters';
@@ -55,5 +55,15 @@ describe('SQLite progress store', () => {
     upsertSession(database!, claims);
     upsertSession(database!, { ...claims, displayName: '游客-NEW' });
     expect(exportUserProgress(database!, claims.userId).profile).toMatchObject({ display_name: '游客-NEW' });
+  });
+
+  it('claims guest matches into a stable Google profile transactionally', async () => {
+    const database = await openProgressDatabase(':memory:');
+    const { claims } = await createGuestSession(secret);
+    saveCompletedMatch(database!, claims, { ...newGame(77), phase: 'finished' }, { score: 80, socialScore: 90, title: '均衡协作型', advice: [], metrics: {} });
+    const google = claimGoogleAccount(database!, claims.userId, { subject: 'google-subject-1', email: 'player@example.com', displayName: '牌友' });
+    expect(listMatchSummaries(database!, google.userId)).toHaveLength(1);
+    expect(exportUserProgress(database!, claims.userId).profile).toBeNull();
+    expect(claimGoogleAccount(database!, null, { subject: 'google-subject-1', email: 'new@example.com', displayName: '新牌友' }).userId).toBe(google.userId);
   });
 });

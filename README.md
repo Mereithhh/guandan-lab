@@ -2,7 +2,7 @@
 
 > 快速会打，体面上桌。不是教你赢老板，是教你成为大家愿意再约的搭档。
 
-[在线体验](https://guandan-bootcamp.miromind-0889.chatgpt.site) · [路线图](./ROADMAP.md) · [参与贡献](./CONTRIBUTING.md)
+[在线体验](https://guandan-bootcamp.miromind-0889.chatgpt.site) · [路线图](./ROADMAP.md) · [隐私说明](./PRIVACY.md) · [参与贡献](./CONTRIBUTING.md)
 
 GuanDan Lab 是一个开源的零基础掼蛋训练器。它把确定性的竞技规则引擎、不会偷看牌的 AI 陪练、记牌训练和逐手复盘放在同一个 15 分钟学习路径里。默认场景是陪虚构角色“陈总”上桌：目标是节奏舒服、配合清楚、牌品可靠，而不是故意输牌或暗示牌情。
 
@@ -41,6 +41,8 @@ docker compose up --build
 默认 SQLite 数据位于 Docker 命名卷的 `/data/guandan.sqlite`。数据库启用 WAL、外键与 busy timeout，并保存游客资料、会话、完整牌局、逐手事件、分析和用量配额表。未配置 `SESSION_SECRET` 时会安全降级为纯本机存档，不会签发可伪造的生产会话。
 
 自托管数据接口支持 `GET /api/progress?export=1` 导出当前游客的数据，及 `DELETE /api/progress` 删除资料。写入和删除要求同源请求与 HttpOnly 签名会话。
+
+可选 Google OAuth 使用 Authorization Code + PKCE。把 `${SITE_URL}/api/auth/google/callback` 注册为回调地址，再配置 `GOOGLE_CLIENT_ID` 与 `GOOGLE_CLIENT_SECRET`；登录后会在事务中把当前游客的历史认领到 Google 资料。项目只保存 Google subject、邮箱和显示名，不保存 Google access token。
 
 ## 可插拔 AI 与语音
 
@@ -87,7 +89,7 @@ npm run test:e2e
 
 - `0.2`：开源基础、陈总训练场景、兼容 AI Provider、ElevenLabs TTS、Docker。
 - `0.3`：5–7 张迷你残局、动态教练、真实事件记牌训练、角色化 Agent。
-- `0.4`：游客云存档、SQLite、自助导出/删除已进入预览；Google OAuth 数据认领仍在开发。
+- `0.4`：游客云存档、SQLite、自助导出/删除与 Google OAuth 数据认领已进入自托管预览。
 - `0.5`：服务端权威在线房间、匹配、断线重连、举报与安全机制。
 - `1.0`：规则变体插件、Agent 锦标赛、稳定协议与可复用规则 SDK。
 

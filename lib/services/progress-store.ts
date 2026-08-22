@@ -49,6 +49,13 @@ CREATE TABLE IF NOT EXISTS sessions (
   expires_at TEXT NOT NULL,
   created_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS google_accounts (
+  provider_subject TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+  email TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS matches (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -167,4 +174,31 @@ export function exportUserProgress(database: SqliteDatabase, userId: string): { 
 
 export function deleteUserProgress(database: SqliteDatabase, userId: string): void {
   database.prepare('DELETE FROM users WHERE id=?').run(userId);
+}
+
+export function claimGoogleAccount(database: SqliteDatabase, guestUserId: string | null, profile: { subject: string; email: string; displayName: string }): { userId: string; displayName: string } {
+  if (!profile.subject || !profile.email || !profile.displayName) throw new Error('Incomplete Google profile');
+  const existing = database.prepare<{ user_id: string }>('SELECT user_id FROM google_accounts WHERE provider_subject=?').get(profile.subject);
+  const userId = existing?.user_id ?? crypto.randomUUID();
+  const now = new Date().toISOString(), displayName = profile.displayName.slice(0, 80), email = profile.email.slice(0, 320);
+  database.exec('BEGIN IMMEDIATE');
+  try {
+    database.prepare(`INSERT INTO users(id,kind,display_name,created_at,updated_at) VALUES(?,?,?,?,?)
+      ON CONFLICT(id) DO UPDATE SET kind='google',display_name=excluded.display_name,updated_at=excluded.updated_at`)
+      .run(userId, 'google', displayName, now, now);
+    database.prepare(`INSERT INTO google_accounts(provider_subject,user_id,email,created_at,updated_at) VALUES(?,?,?,?,?)
+      ON CONFLICT(provider_subject) DO UPDATE SET email=excluded.email,updated_at=excluded.updated_at`)
+      .run(profile.subject, userId, email, now, now);
+    if (guestUserId && guestUserId !== userId) {
+      database.prepare('DELETE FROM matches WHERE user_id=? AND seed IN (SELECT seed FROM matches WHERE user_id=?)').run(guestUserId, userId);
+      database.prepare('UPDATE matches SET user_id=? WHERE user_id=?').run(userId, guestUserId);
+      database.prepare('UPDATE sessions SET user_id=? WHERE user_id=?').run(userId, guestUserId);
+      database.prepare('DELETE FROM users WHERE id=?').run(guestUserId);
+    }
+    database.exec('COMMIT');
+  } catch (error) {
+    database.exec('ROLLBACK');
+    throw error;
+  }
+  return { userId, displayName };
 }

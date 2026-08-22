@@ -15,6 +15,8 @@ The browser owns a deterministic `GameState`; `lib/game` validates every action 
 
 The self-hosted edition uses one Node process and SQLite under `/data`. A signed, HttpOnly guest cookie is created without blocking play; completed training games are written transactionally to `matches`, `match_events` and `analyses`. The schema also reserves durable session and quota records. SQLite runs with WAL, foreign keys and a busy timeout. This is a single-instance choice, not a horizontal-scaling claim; operators must back up the mounted volume.
 
+Optional Google login uses Authorization Code + PKCE, a short-lived signed state cookie and fixed Google token/userinfo endpoints. A successful callback merges guest matches into the existing Google profile transactionally and never persists the provider access token. OAuth is offered only when SQLite, the public site URL and both Google credentials are configured.
+
 When `SESSION_SECRET` or `DATABASE_PATH` is absent—or when the runtime has no persistent filesystem—the browser keeps the local replay store and the API reports `persistent: false`. This is the expected Cloudflare Sites fallback until a D1 adapter is configured.
 
 ## Online target

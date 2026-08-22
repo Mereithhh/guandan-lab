@@ -14,9 +14,9 @@ Roadmap items are proposals until their acceptance checks pass. We do not advert
 
 - [x] Issue an HttpOnly signed guest session without blocking the first game.
 - [x] Store profiles, sessions, match summaries, events, analyses and usage quotas in SQLite for single-node self-hosting.
-- Let Google OAuth users claim guest progress transactionally.
+- [x] Let Google OAuth users claim guest progress transactionally with Authorization Code + PKCE.
 - [x] Support JSON export and deletion for self-hosted guest data.
-- Document retention defaults, backups and the Google account privacy flow before declaring 0.4 stable.
+- [x] Document retention defaults, backups and the Google account privacy flow.
 
 ## 0.5 — Online rooms
 
