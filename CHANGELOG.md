@@ -4,6 +4,8 @@ All notable changes will be documented here.
 
 ## Unreleased
 
+- Added Alibaba Cloud Bailian Qwen3-TTS as an opt-in cloud voice (`TTS_PROVIDER=aliyun`) with native Mandarin character voices; ElevenLabs remains the default. Signed OSS audio links are host-allowlisted and always fetched over HTTPS.
+
 ## 0.3.0-beta.23 — 2026-08-22
 
 - Made ElevenLabs and browser speech follow the actual Chinese/English coaching text, with the active UI locale as a safe fallback.

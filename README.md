@@ -24,7 +24,7 @@ GuanDan Lab 是一个开源的零基础掼蛋训练器。它先用标称 15 分�
 - 以 2022 年《竞技掼蛋竞赛规则（试行）》为基线实现教学规则；地区差异会明确标为变体，来源与已知差异见 [RULES_SOURCES.md](./RULES_SOURCES.md)。
 - 使用两副 108 张唯一牌 ID 完成四人对局，规则引擎负责校验所有动作。
 - 三位本地 Agent 有可测试的固定风格：王总稳健控场、小顾搭档优先、林姐效率突围；配置兼容 OpenAI 的服务端接口后，大模型会收到相同角色标识，返回动作仍会经过本地合法性校验。
-- 配置 ElevenLabs 后使用中文语音教练；未配置或请求失败时回退到设备语音，字幕始终存在。
+- 配置 ElevenLabs 或阿里云百炼 Qwen3-TTS（`TTS_PROVIDER` 显式选择）后使用中文语音教练；未配置或请求失败时回退到设备语音，字幕始终存在。
 - 首页、15 分钟 mastery 课程与完整规则支持中英双语；键盘可操作的语言选择会保存在本机，牌局规则逻辑不复制。
 - 课程后提供 5 个可选的确定性“王总局”迷你残局：每关只有 5—7 张手牌，所有候选动作经真实规则引擎校验，并分别解释牌技与牌桌表达。
 - 同点手牌叠放、可调 AI 节奏、最近出牌记录、一键合法提示；红桃级牌会显示“配”并解释本手的具体替代关系。
@@ -91,6 +91,7 @@ PAID_PROVIDER_GLOBAL_DAILY_UNITS=5000
 ELEVENLABS_API_KEY=replace-me
 ELEVENLABS_VOICE_ID=replace-me
 ELEVENLABS_MODEL_ID=eleven_multilingual_v2
+# 改用阿里云百炼 Qwen3-TTS：TTS_PROVIDER=aliyun 并设置 ALIYUN_TTS_API_KEY
 
 # Optional: show a voluntary support QR code in the footer.
 SUPPORT_URL=https://your-public-payment-link.example

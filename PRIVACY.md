@@ -18,7 +18,7 @@ Google login is optional and disabled unless the operator configures it. The app
 
 ## AI and voice providers
 
-Optional compatible-model requests contain a seat-limited observation and legal move IDs. Optional ElevenLabs requests contain the displayed coach sentence. Provider credentials stay on the server. Operators should review their chosen providers' policies and configure durable quotas before enabling paid services for anonymous public traffic.
+Optional compatible-model requests contain a seat-limited observation and legal move IDs. Optional cloud voice requests contain the displayed coach sentence and are sent to ElevenLabs by default, or to Alibaba Cloud (Aliyun Bailian) when the operator sets `TTS_PROVIDER=aliyun`. Provider credentials stay on the server. Operators should review their chosen providers' policies and configure durable quotas before enabling paid services for anonymous public traffic.
 
 ## Online rooms
 

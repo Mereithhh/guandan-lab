@@ -42,7 +42,7 @@ GuanDan Lab turns those gaps into one verifiable training loop:
 - 32 competition-rule conformance checks: 30 table-driven fixtures, one response-right scenario and one provenance check.
 - Three testably distinct local AI players—Wang controls, Gu supports the partner, and Lin sheds efficiently—using only seat-visible information and validated legal action IDs.
 - An optional OpenAI-compatible server-side Agent for moves and post-match public-event coaching; every returned move is validated locally before play.
-- Optional ElevenLabs Chinese coaching with captions and automatic device-speech fallback.
+- Optional ElevenLabs or Aliyun Qwen3-TTS (chosen with `TTS_PROVIDER`) Chinese coaching with captions and automatic device-speech fallback.
 - Chinese and English onboarding, mastery course and rulebook with a persisted keyboard-accessible language switch.
 - Five deterministic mini endgames whose candidate actions are checked by the production rules engine, with no opponent hands exposed.
 - Same-rank hand stacks, adjustable AI pacing, expandable live play history and one-click legal hints.
@@ -97,6 +97,7 @@ PAID_PROVIDER_GLOBAL_DAILY_UNITS=5000
 ELEVENLABS_API_KEY=replace-me
 ELEVENLABS_VOICE_ID=replace-me
 ELEVENLABS_MODEL_ID=eleven_multilingual_v2
+# To use Aliyun Bailian Qwen3-TTS instead: TTS_PROVIDER=aliyun plus ALIYUN_TTS_API_KEY
 ```
 
 The compatible Agent endpoint fixes the request path to `/chat/completions`, rejects unsafe private base URLs by default, limits input and output sizes, enforces timeouts and returns only locally validated moves. The ElevenLabs route rejects redirects, validates the audio response, limits its size and returns an explicit browser-speech fallback on failure.

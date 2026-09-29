@@ -6,12 +6,12 @@ The browser owns a deterministic `GameState`; `lib/game` validates every action 
 
 ## Trust boundary
 
-- ElevenLabs and compatible-model secrets remain in server environment variables.
+- ElevenLabs, Aliyun TTS and compatible-model secrets remain in server environment variables.
 - The browser calls same-origin API routes and never receives provider credentials.
 - Model output is untrusted. It must match one of the legal moves computed by the rules core; otherwise the deterministic fallback is used.
 - A provider base URL is administrator configuration, not a player preference. Public HTTPS is required by default to reduce SSRF and accidental key exfiltration.
 - Paid routes run in the Node runtime and require a valid signed session that is still active in SQLite. The same transaction revalidates that session and atomically reserves both the user's and deployment's UTC-day budget before any provider request.
-- AI and voice use separate in-process circuits, a single half-open recovery probe and a shared concurrency ceiling. Stale successes cannot close a newer open circuit. ElevenLabs cache keys are SHA-256 hashes, and authentication happens before cache lookup.
+- AI and voice use separate in-process circuits, a single half-open recovery probe and a shared concurrency ceiling. Stale successes cannot close a newer open circuit. TTS cache keys (which include the explicit `TTS_PROVIDER` choice, `elevenlabs` or `aliyun`) are SHA-256 hashes; the Aliyun path makes a generation call and then downloads audio only from an allowlisted `dashscope-result-*` OSS host with redirects disabled, and authentication happens before cache lookup.
 
 ## Self-host persistence
 

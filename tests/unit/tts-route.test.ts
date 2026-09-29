@@ -83,3 +83,64 @@ describe('ElevenLabs TTS route',()=>{
     expect((await POST(unsigned)).status).toBe(401);expect(provider).toHaveBeenCalledOnce();
   });
 });
+
+describe('Aliyun TTS route',()=>{
+  const audioUrl='http://dashscope-result-bj.oss-cn-beijing.aliyuncs.com/tts/a.mp3?Signature=s';
+  const aliyunEnv=()=>{vi.stubEnv('PAID_PROVIDERS_ENABLED','1');vi.stubEnv('TTS_PROVIDER','aliyun');vi.stubEnv('ALIYUN_TTS_API_KEY','aliyun-secret')};
+  const upstream=(url:unknown=audioUrl)=>vi.fn<typeof fetch>(async(input)=>String(input).endsWith('/generation')?Response.json({output:{audio:{url}},request_id:'r'}):new Response(new Uint8Array([1,2,3]),{headers:{'content-type':'audio/mpeg'}}));
+
+  it('generates speech, downloads it from the OSS host and passes the content type through',async()=>{
+    aliyunEnv();vi.stubEnv('ALIYUN_TTS_BASE_URL','https://ws-1.cn-beijing.maas.aliyuncs.com/api/v1/');vi.stubEnv('ALIYUN_TTS_VOICE_LIN','Custom');
+    const provider=vi.fn<typeof fetch>(async(input)=>String(input).endsWith('/generation')?Response.json({output:{audio:{url:audioUrl}}}):new Response(new Uint8Array([1,2,3]),{headers:{'content-type':'audio/x-wav'}}));vi.stubGlobal('fetch',provider);
+    const response=await POST(request('Lin takes the lead.',{locale:'en',speaker:'lin'}));
+    expect(response.status).toBe(200);expect(response.headers.get('content-type')).toBe('audio/x-wav');
+    expect(provider).toHaveBeenCalledTimes(2);const [url,init]=provider.mock.calls[0];
+    expect(url).toBe('https://ws-1.cn-beijing.maas.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation');
+    expect(init!.redirect).toBe('error');expect((init!.headers as Record<string,string>).authorization).toBe('Bearer aliyun-secret');
+    expect(JSON.parse(String(init!.body))).toEqual({model:'qwen3-tts-flash',input:{text:'Lin takes the lead.',voice:'Custom',language_type:'English'},parameters:{response_format:'mp3'}});
+    const [downloadUrl,downloadInit]=provider.mock.calls[1];expect(downloadUrl).toBe(audioUrl.replace('http:','https:'));expect(downloadInit!.redirect).toBe('error');expect(downloadInit!.headers).toBeUndefined();
+    expect([...response.headers.values()].join(' ')).not.toContain('aliyun-secret');
+  });
+
+  it('uses the default endpoint, Chinese language type and per-speaker default voices',async()=>{
+    aliyunEnv();const provider=upstream();vi.stubGlobal('fetch',provider);
+    for(const [speaker,voice] of [['coach','Cherry'],['wang','Andre'],['gu','Ethan']] as const){
+      expect((await POST(request(`王总，这手牌打得很准。${speaker}`,{locale:'zh',speaker}))).status).toBe(200);
+      const calls=provider.mock.calls.filter(([input])=>String(input).endsWith('/generation')),[url,init]=calls[calls.length-1];
+      expect(url).toBe('https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation');
+      expect(JSON.parse(String(init!.body))).toMatchObject({input:{voice,language_type:'Chinese'}});
+    }
+  });
+
+  it('caches by provider so a repeated line is not generated twice',async()=>{
+    aliyunEnv();const provider=upstream();vi.stubGlobal('fetch',provider);
+    expect((await POST(request('缓存语音测试'))).status).toBe(200);expect((await POST(request('缓存语音测试'))).status).toBe(200);expect(provider).toHaveBeenCalledTimes(2);
+  });
+
+  it('rejects an audio URL outside the OSS allowlist without downloading it',async()=>{
+    aliyunEnv();const provider=upstream('https://evil.example/a.mp3');vi.stubGlobal('fetch',provider);
+    const response=await POST(request('主机白名单测试'));
+    expect(response.status).toBe(502);await expect(response.json()).resolves.toMatchObject({fallback:'browser'});expect(provider).toHaveBeenCalledOnce();
+  });
+
+  it('falls back when the response has no audio URL or the upstream fails',async()=>{
+    aliyunEnv();vi.stubGlobal('fetch',vi.fn(async()=>Response.json({output:{}})));
+    expect((await POST(request('缺少地址测试'))).status).toBe(502);
+    vi.stubGlobal('fetch',vi.fn(async()=>Response.json({code:'Throttling'},{status:429})));
+    const response=await POST(request('上游失败测试'));expect(response.status).toBe(502);expect(await response.text()).not.toContain('Throttling');
+  });
+
+  it('returns 503 without contacting Aliyun when the key or endpoint is missing',async()=>{
+    vi.stubEnv('PAID_PROVIDERS_ENABLED','1');vi.stubEnv('TTS_PROVIDER','aliyun');vi.stubEnv('ELEVENLABS_API_KEY','eleven');vi.stubEnv('ELEVENLABS_VOICE_ID','voice');
+    const provider=vi.fn<typeof fetch>();vi.stubGlobal('fetch',provider);
+    const missing=await POST(request('未配置测试'));expect(missing.status).toBe(503);await expect(missing.json()).resolves.toMatchObject({fallback:'browser'});
+    vi.stubEnv('ALIYUN_TTS_API_KEY','aliyun-secret');vi.stubEnv('ALIYUN_TTS_BASE_URL','http://dashscope.aliyuncs.com/api/v1');
+    expect((await POST(request('端点无效测试'))).status).toBe(503);expect(provider).not.toHaveBeenCalled();
+  });
+
+  it('keeps ElevenLabs when TTS_PROVIDER is unset even if Aliyun keys exist',async()=>{
+    vi.stubEnv('PAID_PROVIDERS_ENABLED','1');vi.stubEnv('ALIYUN_TTS_API_KEY','aliyun-secret');vi.stubEnv('ELEVENLABS_API_KEY','eleven');vi.stubEnv('ELEVENLABS_VOICE_ID','voice');
+    const provider=vi.fn<typeof fetch>(async()=>new Response(new Uint8Array([1]),{headers:{'content-type':'audio/mpeg'}}));vi.stubGlobal('fetch',provider);
+    expect((await POST(request('默认服务商测试'))).status).toBe(200);expect(String(provider.mock.calls[0][0])).toContain('api.elevenlabs.io');
+  });
+});
