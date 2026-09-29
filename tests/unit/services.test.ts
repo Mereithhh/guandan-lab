@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeBaseUrl, parseAgentMove, providerChatCompletionsUrl } from '../../lib/services/compatible-agent';
+import { normalizeBaseUrl, parseAgentMove, providerChatCompletionsUrl, providerReasoningOptions } from '../../lib/services/compatible-agent';
 import { elevenLabsModelId, elevenLabsSpeechUrl, elevenLabsVoiceId, MAX_TTS_CHARS, normalizeTtsLocale, normalizeTtsSpeaker, normalizeVoiceText, resolveVoiceLocale, ttsSpeakerForSeat } from '../../lib/services/tts';
 import { BodyTooLargeError, consumeRateLimit, isSameOrigin, isSecureRequest, publicRequestOrigin, readJsonBody,readResponseBytes,ResponseTooLargeError } from '../../lib/services/http-guard';
 import { providerStatus } from '../../lib/services/provider-status';
@@ -58,6 +58,8 @@ describe('service boundaries', () => {
     expect(parseAgentMove('{"move":["a","b"]}', [['a|b']])).toBeNull();
     expect(normalizeBaseUrl(' https://example.com/v1/// ')).toBe('https://example.com/v1');
     expect(providerChatCompletionsUrl('https://example.com/v1')).toBe('https://example.com/v1/chat/completions');
+    expect(providerReasoningOptions(' none ')).toEqual({ reasoning_effort: 'none' });
+    for (const unset of [undefined, '', '  ']) expect(providerReasoningOptions(unset)).toEqual({});
     expect(providerChatCompletionsUrl('http://127.0.0.1:11434/v1')).toBeNull();
     expect(providerChatCompletionsUrl('http://127.0.0.1:11434/v1', true)).toBe('http://127.0.0.1:11434/v1/chat/completions');
     expect(providerChatCompletionsUrl('https://user:pass@example.com/v1')).toBeNull();

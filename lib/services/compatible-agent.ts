@@ -26,6 +26,12 @@ export function providerChatCompletionsUrl(value: string, allowPrivate = false):
   } catch { return null; }
 }
 
+/** Optional OpenAI-style `reasoning_effort`; lets thinking-by-default models answer within the tight token budgets. */
+export function providerReasoningOptions(value = process.env.AI_REASONING_EFFORT): { reasoning_effort?: string } {
+  const effort = value?.trim();
+  return effort ? { reasoning_effort: effort } : {};
+}
+
 export type ParsedAgentDecision={valid:true;move:string[]|null}|{valid:false};
 
 export function parseAgentDecision(content: string, legalMoves: string[][]):ParsedAgentDecision {

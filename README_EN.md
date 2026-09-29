@@ -99,7 +99,7 @@ ELEVENLABS_VOICE_ID=replace-me
 ELEVENLABS_MODEL_ID=eleven_multilingual_v2
 ```
 
-The compatible Agent endpoint fixes the request path to `/chat/completions`, rejects unsafe private base URLs by default, limits input and output sizes, enforces timeouts and returns only locally validated moves. The ElevenLabs route rejects redirects, validates the audio response, limits its size and returns an explicit browser-speech fallback on failure.
+Models that reason by default (for example DeepSeek `deepseek-flash`) can exhaust the small output budget and return empty content; set `AI_REASONING_EFFORT=none` to send the standard `reasoning_effort` field, or leave it unset to keep requests unchanged. The compatible Agent endpoint fixes the request path to `/chat/completions`, rejects unsafe private base URLs by default, limits input and output sizes, enforces timeouts and returns only locally validated moves. The ElevenLabs route rejects redirects, validates the audio response, limits its size and returns an explicit browser-speech fallback on failure.
 
 Enabling paid providers also requires `SESSION_SECRET`, `DATABASE_PATH`, and explicit positive per-user and deployment-wide daily budgets; otherwise calls fail closed. SQLite atomically charges relative cost units per UTC day (defaults: Agent 1, review 2, ElevenLabs 1 per 100 characters). These units are not currency or token counts, so set conservative limits from your provider pricing.
 

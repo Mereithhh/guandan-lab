@@ -96,7 +96,7 @@ ELEVENLABS_MODEL_ID=eleven_multilingual_v2
 SUPPORT_URL=https://your-public-payment-link.example
 ```
 
-`AI_BASE_URL` 默认必须是公网 HTTPS 地址，并固定请求 `/chat/completions`。只有在明确知道风险的本地自托管环境中，才能设置 `AI_ALLOW_PRIVATE_BASE_URL=1` 访问局域网模型。
+`AI_BASE_URL` 默认必须是公网 HTTPS 地址，并固定请求 `/chat/completions`。只有在明确知道风险的本地自托管环境中，才能设置 `AI_ALLOW_PRIVATE_BASE_URL=1` 访问局域网模型。默认先思考再回答的模型（例如 DeepSeek `deepseek-flash`）会在很小的输出预算内返回空内容，可设置 `AI_REASONING_EFFORT=none` 关闭思考；不设置时请求保持不变。
 
 赛后大模型只会收到公开出牌事件、名次和不含暗牌的本地确定性统计，不会收到任何玩家未出的手牌。模型只能从受控的牌风与建议代码中选择，由本地映射为审核过的文案；牌技分、社交分和统计证据也始终由本地代码确定。超时、限流、自由文本或格式错误都会明确回退到本地证据复盘。
 

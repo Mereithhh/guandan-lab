@@ -4,6 +4,8 @@ All notable changes will be documented here.
 
 ## Unreleased
 
+- Added optional `AI_REASONING_EFFORT` so thinking-by-default compatible models (such as DeepSeek `deepseek-flash`) can answer within the Agent and review token budgets.
+
 ## 0.3.0-beta.23 — 2026-08-22
 
 - Made ElevenLabs and browser speech follow the actual Chinese/English coaching text, with the active UI locale as a safe fallback.

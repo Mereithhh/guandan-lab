@@ -1,6 +1,7 @@
 import {
   parseAgentDecision,
   providerChatCompletionsUrl,
+  providerReasoningOptions,
   type CompatibleAgentRequest,
 } from "@/lib/services/compatible-agent";
 import {
@@ -249,6 +250,7 @@ export async function POST(request: Request) {
         model,
         temperature: 0.25,
         max_tokens: 120,
+        ...providerReasoningOptions(),
         messages: [
           {
             role: "system",
