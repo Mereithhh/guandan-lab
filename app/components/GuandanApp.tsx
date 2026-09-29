@@ -341,7 +341,10 @@ export default function GuandanApp({ supportUrl }: { supportUrl: string }) {
           agentProvider:
             data.agentProvider === "compatible" ? "compatible" : "local",
           voiceProvider:
-            data.voiceProvider === "elevenlabs" ? "elevenlabs" : "browser",
+            data.voiceProvider === "elevenlabs" ||
+            data.voiceProvider === "aliyun"
+              ? data.voiceProvider
+              : "browser",
           displayName: data.profile?.displayName,
         });
         if (!data.persistent) {
@@ -991,7 +994,9 @@ function SiteFooter({
           / {f.voiceLabel} ·{" "}
           {account.voiceProvider === "elevenlabs"
             ? f.elevenLabsVoice
-            : f.deviceVoice}
+            : account.voiceProvider === "aliyun"
+              ? f.aliyunVoice
+              : f.deviceVoice}
         </span>
         {account.mode === "google" && (
           <span>
