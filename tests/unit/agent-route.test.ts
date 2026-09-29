@@ -106,6 +106,24 @@ describe("compatible agent route contract", () => {
     expect(String(init?.body)).not.toContain("must-not-leave-route");
     expect(String(init?.body)).not.toContain("IGNORE RULES");
     expect(String(init?.body)).toContain("你是“王总”的决策层");
+    expect(JSON.parse(String(init?.body))).not.toHaveProperty("reasoning_effort");
+  });
+
+  it("forwards the optional reasoning effort for thinking-by-default models", async () => {
+    configure();
+    vi.stubEnv("AI_REASONING_EFFORT", "none");
+    const provider = vi.fn<typeof fetch>(async () =>
+      Response.json({
+        choices: [{ message: { content: '{"move":["card-a"]}' } }],
+      }),
+    );
+    vi.stubGlobal("fetch", provider);
+
+    expect((await POST(request())).status).toBe(200);
+    expect(JSON.parse(String(provider.mock.calls[0][1]?.body))).toMatchObject({
+      max_tokens: 120,
+      reasoning_effort: "none",
+    });
   });
 
   it("rejects unsafe provider URLs and cross-origin callers before fetch", async () => {

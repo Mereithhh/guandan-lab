@@ -1,5 +1,5 @@
 import { parseRemoteMatchReview,sanitizePublicMatchReview,type PublicMatchReview } from '@/lib/services/match-review';
-import { providerChatCompletionsUrl } from '@/lib/services/compatible-agent';
+import { providerChatCompletionsUrl,providerReasoningOptions } from '@/lib/services/compatible-agent';
 import { BodyTooLargeError,consumeRateLimit,isSameOrigin,readJsonBody,readResponseText,requestClientKey } from '@/lib/services/http-guard';
 import { acquireProviderLease,authorizePaidProvider,cancelProviderLease,chargePaidProvider,recordProviderResult } from '@/lib/services/provider-guard';
 
@@ -18,7 +18,7 @@ export async function POST(request:Request){
   const quotaResponse=chargePaidProvider(authorization.context!,'review');if(quotaResponse){cancelProviderLease(lease);return quotaResponse}
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),6500);
   try{
-    const response=await fetch(endpoint,{method:'POST',signal:controller.signal,redirect:'error',headers:{authorization:`Bearer ${apiKey}`,'content-type':'application/json'},body:JSON.stringify({model,temperature:.1,max_tokens:180,messages:[{role:'system',content:'你是竞技掼蛋赛后分类器。输入只含公开出牌事件与不含暗牌的本地统计。禁止猜测隐藏手牌，禁止故意输牌、讨好、奉承、暗号或串通。只输出严格 JSON，不能输出自由文本：{"styleCode":"balanced|observant|partnerFirst|control","adviceCodes":["observeTempo|partnerPriority|bombTiming|leadEfficiency|clearCommunication|memoryReview"]}。adviceCodes 必须选 2 到 4 个且不重复，至少一个牌技代码和一个搭档/节奏代码。'},{role:'user',content:JSON.stringify(safeReview)}]})});
+    const response=await fetch(endpoint,{method:'POST',signal:controller.signal,redirect:'error',headers:{authorization:`Bearer ${apiKey}`,'content-type':'application/json'},body:JSON.stringify({model,temperature:.1,max_tokens:180,...providerReasoningOptions(),messages:[{role:'system',content:'你是竞技掼蛋赛后分类器。输入只含公开出牌事件与不含暗牌的本地统计。禁止猜测隐藏手牌，禁止故意输牌、讨好、奉承、暗号或串通。只输出严格 JSON，不能输出自由文本：{"styleCode":"balanced|observant|partnerFirst|control","adviceCodes":["observeTempo|partnerPriority|bombTiming|leadEfficiency|clearCommunication|memoryReview"]}。adviceCodes 必须选 2 到 4 个且不重复，至少一个牌技代码和一个搭档/节奏代码。'},{role:'user',content:JSON.stringify(safeReview)}]})});
     if(!response.ok){recordProviderResult(lease,false);return Response.json({error:'远程 AI 暂时不可用'},{status:502})}const raw=await readResponseText(response,120_000);
     const data=JSON.parse(raw) as {choices?:Array<{message?:{content?:string}}>},content=data.choices?.[0]?.message?.content;if(typeof content!=='string'||!content.trim()){recordProviderResult(lease,false);return Response.json({error:'远程 AI 返回为空'},{status:502})}
     const review=parseRemoteMatchReview(content);if(!review){recordProviderResult(lease,false);return Response.json({error:'远程 AI 复盘格式无效'},{status:502})}recordProviderResult(lease,true);return Response.json({review,provider:'compatible'});
